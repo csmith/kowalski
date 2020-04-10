@@ -40,7 +40,7 @@ func (n *Node) Match(word string) []string {
 	}
 
 	stems := []*match{{"", n}}
-	for offset := 0; offset < len(word); offset++ {
+	for offset := 0; offset < len(word) && len(stems) > 0; offset++ {
 		newStems := make([]*match, 0, len(stems))
 
 		var chars []uint8
@@ -81,19 +81,15 @@ func (n *Node) Anagrams(word string) []string {
 		chars[i] = int(r)
 	}
 
-	perms := make(map[string]bool)
-	for _, p := range permutations(chars) {
+	var res []string
+	permutations(chars, func(rs []int) {
 		builder := strings.Builder{}
-		for _, r := range p {
+		for _, r := range rs {
 			builder.WriteRune(rune(r))
 		}
-		perms[builder.String()] = true
-	}
 
-	var res []string
-	for p := range perms {
-		res = append(res, n.Match(p)...)
-	}
+		res = append(res, n.Match(builder.String())...)
+	})
 
 	sort.Strings(res)
 
@@ -133,15 +129,12 @@ func isValidWord(word string) bool {
 	return true
 }
 
-func permutations(arr []int) [][]int {
+func permutations(arr []int, callback func([]int)) {
 	var helper func([]int, int)
-	var res [][]int
 
 	helper = func(arr []int, n int) {
 		if n == 1 {
-			tmp := make([]int, len(arr))
-			copy(tmp, arr)
-			res = append(res, tmp)
+			callback(arr)
 		} else {
 			for i := 0; i < n; i++ {
 				helper(arr, n-1)
@@ -157,8 +150,8 @@ func permutations(arr []int) [][]int {
 			}
 		}
 	}
+
 	helper(arr, len(arr))
-	return res
 }
 
 func unique(words []string) (res []string) {
@@ -166,6 +159,7 @@ func unique(words []string) (res []string) {
 	for _, w := range words {
 		if w != last {
 			res = append(res, w)
+			last = w
 		}
 	}
 	return
