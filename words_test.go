@@ -1,0 +1,87 @@
+package kowalski
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestLoadWords(t *testing.T) {
+	words, err := LoadWords("testdata/test_words.txt")
+	if err != nil {
+		t.Errorf("LoadWords() failed to load test file: %v", err)
+		return
+	}
+
+	if words.Valid {
+		t.Errorf("Root element should not be valid")
+		return
+	}
+
+	f := words.Children['f'-'a']
+	if f == nil {
+		t.Errorf("Root element must have an 'f' child")
+		return
+	}
+
+	if f.Valid {
+		t.Errorf("'f' element should not be valid")
+		return
+	}
+
+	if !f.Children['o'-'a'].Children['o'-'a'].Valid {
+		t.Errorf("'foo' element should be valid")
+		return
+	}
+}
+
+func TestNode_Match(t *testing.T) {
+	words, _ := LoadWords("testdata/test_words.txt")
+	tests := []struct {
+		name  string
+		query string
+		want  []string
+	}{
+		{"exact match", "foo", []string{"foo"}},
+		{"exact match with one wildcard", "fo?", []string{"foo"}},
+		{"exact match with two wildcards", "f??", []string{"foo"}},
+		{"exact match with all wildcards", "????", []string{"quux"}},
+		{"multiple matches with one wildcard", "ba?", []string{"bar", "baz"}},
+		{"multiple matches with all wildcards", "???", []string{"bar", "baz", "foo"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := words.Match(tt.query); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Match() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNode_Anagrams(t *testing.T) {
+	words, _ := LoadWords("testdata/test_words.txt")
+	tests := []struct {
+		name  string
+		query string
+		want  []string
+	}{
+		{"exact match", "foo", []string{"foo"}},
+		{"anagram match", "oof", []string{"foo"}},
+		{"exact match with one wildcard", "fo?", []string{"foo"}},
+		{"anagram match with one wildcard", "oo?", []string{"foo"}},
+		{"exact match with two wildcards", "f??", []string{"foo"}},
+		{"anagram match with two wildcards", "?f?", []string{"foo"}},
+		{"exact match with all wildcards", "????", []string{"quux"}},
+		{"multiple exact matches with one wildcard", "ba?", []string{"bar", "baz"}},
+		{"multiple anagram matches with one wildcard", "b?a", []string{"bar", "baz"}},
+		{"multiple exact matches with all wildcards", "???", []string{"bar", "baz", "foo"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := words.Anagrams(tt.query); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Anagrams() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

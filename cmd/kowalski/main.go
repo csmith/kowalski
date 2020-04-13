@@ -13,15 +13,17 @@ import (
 )
 
 var (
-	token = flag.String("token", "", "Discord bot token")
+	token    = flag.String("token", "", "Discord bot token")
+	wordList = flag.String("word-list", "wordlist.txt", "Path of the word list file")
+
 	words *kowalski.Node
 )
 
-func main()  {
+func main() {
 	flag.Parse()
 
 	var err error
-	words, err = kowalski.LoadWords()
+	words, err = kowalski.LoadWords(*wordList)
 	if err != nil {
 		log.Panicf("Failed to load words: %v\n", err)
 	}

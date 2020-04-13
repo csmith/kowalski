@@ -2,15 +2,10 @@ package kowalski
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"os"
 	"sort"
 	"strings"
-)
-
-var (
-	wordList = flag.String("word-list", "wordlist.txt", "Path of the word list file")
 )
 
 type Node struct {
@@ -33,6 +28,7 @@ func (n *Node) append(word string) {
 	}
 }
 
+// Match returns all valid words that match the given input, expanding '?' as a single character wildcard
 func (n *Node) Match(word string) []string {
 	type match struct {
 		text string
@@ -75,6 +71,7 @@ func (n *Node) Match(word string) []string {
 	return res
 }
 
+// Anagrams finds all anagrams of the given word, expanding '?' as a single wildcard character
 func (n *Node) Anagrams(word string) []string {
 	chars := make([]int, len(word))
 	for i, r := range word {
@@ -96,16 +93,17 @@ func (n *Node) Anagrams(word string) []string {
 	return unique(res)
 }
 
-func LoadWords() (*Node, error) {
+// LoadWords reads all words from the given file and constructs a Trie for use in future operations
+func LoadWords(file string) (*Node, error) {
 	root := &Node{}
 
-	file, err := os.Open(*wordList)
+	f, err := os.Open(file)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer f.Close()
 
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		line := strings.ToLower(scanner.Text())
 		if isValidWord(line) {
