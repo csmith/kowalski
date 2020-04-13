@@ -30,7 +30,7 @@ func (n *Node) append(word string) {
 
 // Match returns all valid words that match the given input, expanding '?' as a single character wildcard
 func (n *Node) Match(word string) []string {
-	res, _ := n.findMatch(word)
+	res, _ := n.findMatch(strings.ToLower(word))
 	return res
 }
 
@@ -86,7 +86,7 @@ func (n *Node) Anagrams(word string) []string {
 	)
 
 	sortedWord := func(w string) string {
-		s := strings.Split(w, "")
+		s := strings.Split(strings.ToLower(w), "")
 		sort.Strings(s)
 		return strings.Join(s, "")
 	}(word)
