@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"reflect"
 	"sort"
 	"strings"
 )
@@ -30,11 +31,17 @@ func (n *Node) append(word string) {
 
 // Match returns all valid words that match the given input, expanding '?' as a single character wildcard
 func (n *Node) Match(word string) []string {
+	res, _ := n.findMatch(word)
+	return res
+}
+
+func (n *Node) findMatch(word string) ([]string, int) {
 	type match struct {
 		text string
 		node *Node
 	}
 
+	maxLength := 0
 	stems := []*match{{"", n}}
 	for offset := 0; offset < len(word) && len(stems) > 0; offset++ {
 		newStems := make([]*match, 0, len(stems))
@@ -58,6 +65,7 @@ func (n *Node) Match(word string) []string {
 			}
 		}
 
+		maxLength = offset
 		stems = newStems
 	}
 
@@ -68,28 +76,39 @@ func (n *Node) Match(word string) []string {
 		}
 	}
 	sort.Strings(res)
-	return res
+	return res, maxLength
 }
 
 // Anagrams finds all anagrams of the given word, expanding '?' as a single wildcard character
 func (n *Node) Anagrams(word string) []string {
-	chars := make([]int, len(word))
-	for i, r := range word {
-		chars[i] = int(r)
-	}
+	var (
+		res       []string
+		lastCount = -1
+		lastWord  = make([]byte, len(word))
+	)
 
-	var res []string
-	permutations(chars, func(rs []int) {
-		builder := strings.Builder{}
-		for _, r := range rs {
-			builder.WriteRune(rune(r))
+	sortedWord := func(w string) string {
+		s := strings.Split(w, "")
+		sort.Strings(s)
+		return strings.Join(s, "")
+	}(word)
+
+	for w := []byte(sortedWord); w != nil; w = permute(w) {
+		if lastCount >= 0 && reflect.DeepEqual(w[0:lastCount+1], lastWord[0:lastCount+1]) {
+			continue
 		}
 
-		res = append(res, n.Match(builder.String())...)
-	})
+		matches, count := n.findMatch(string(w))
+		if len(matches) > 0 {
+			res = append(res, matches...)
+			lastCount = -1
+		} else {
+			lastCount = count
+			copy(lastWord, w)
+		}
+	}
 
 	sort.Strings(res)
-
 	return unique(res)
 }
 
@@ -127,29 +146,29 @@ func isValidWord(word string) bool {
 	return true
 }
 
-func permutations(arr []int, callback func([]int)) {
-	var helper func([]int, int)
-
-	helper = func(arr []int, n int) {
-		if n == 1 {
-			callback(arr)
-		} else {
-			for i := 0; i < n; i++ {
-				helper(arr, n-1)
-				if n%2 == 1 {
-					tmp := arr[i]
-					arr[i] = arr[n-1]
-					arr[n-1] = tmp
-				} else {
-					tmp := arr[0]
-					arr[0] = arr[n-1]
-					arr[n-1] = tmp
-				}
-			}
+// permute returns the next permutation of the given input, in lexicographical ordering
+func permute(input []byte) []byte {
+	k, l := -1, -1
+	for i := range input {
+		if i+1 < len(input) && input[i] < input[i+1] {
+			k = i
+			l = -1
+		} else if k >= 0 && input[k] < input[i] {
+			l = i
 		}
 	}
 
-	helper(arr, len(arr))
+	if k == -1 {
+		return nil
+	}
+
+	input[k], input[l] = input[l], input[k]
+
+	for left, right := k+1, len(input)-1; left < right; left, right = left+1, right-1 {
+		input[left], input[right] = input[right], input[left]
+	}
+
+	return input
 }
 
 func unique(words []string) (res []string) {

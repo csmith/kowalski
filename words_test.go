@@ -85,3 +85,25 @@ func TestNode_Anagrams(t *testing.T) {
 		})
 	}
 }
+
+func Test_permute(t *testing.T) {
+	tests := []struct {
+		name  string
+		input []byte
+		want  []byte
+	}{
+		{"Simple permutation 1", []byte("abc"), []byte("acb")},
+		{"Simple permutation 2", []byte("acb"), []byte("bac")},
+		{"Simple permutation 3", []byte("bac"), []byte("bca")},
+		{"Simple permutation 4", []byte("bca"), []byte("cab")},
+		{"Simple permutation 5", []byte("cab"), []byte("cba")},
+		{"Simple permutation 6", []byte("cba"), nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := permute(tt.input); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("permute() = %v, want %v", string(got), string(tt.want))
+			}
+		})
+	}
+}
