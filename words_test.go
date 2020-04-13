@@ -88,20 +88,22 @@ func TestNode_Anagrams(t *testing.T) {
 
 func Test_permute(t *testing.T) {
 	tests := []struct {
-		name  string
-		input []byte
-		want  []byte
+		name       string
+		input      []byte
+		swapBefore int
+		want       []byte
 	}{
-		{"Simple permutation 1", []byte("abc"), []byte("acb")},
-		{"Simple permutation 2", []byte("acb"), []byte("bac")},
-		{"Simple permutation 3", []byte("bac"), []byte("bca")},
-		{"Simple permutation 4", []byte("bca"), []byte("cab")},
-		{"Simple permutation 5", []byte("cab"), []byte("cba")},
-		{"Simple permutation 6", []byte("cba"), nil},
+		{"Simple permutation 1", []byte("abc"), 3,[]byte("acb")},
+		{"Simple permutation 2", []byte("acb"), 3, []byte("bac")},
+		{"Simple permutation 3", []byte("bac"), 3, []byte("bca")},
+		{"Simple permutation 4", []byte("bca"), 3, []byte("cab")},
+		{"Simple permutation 5", []byte("cab"), 3, []byte("cba")},
+		{"Simple permutation 6", []byte("cba"), 3, nil},
+		{"SwapBefore 1", []byte("abc"), 1,[]byte("bac")},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := permute(tt.input); !reflect.DeepEqual(got, tt.want) {
+			if got := permute(tt.input, tt.swapBefore); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("permute() = %v, want %v", string(got), string(tt.want))
 			}
 		})

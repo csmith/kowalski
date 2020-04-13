@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"reflect"
 	"sort"
 	"strings"
 )
@@ -82,9 +81,8 @@ func (n *Node) findMatch(word string) ([]string, int) {
 // Anagrams finds all anagrams of the given word, expanding '?' as a single wildcard character
 func (n *Node) Anagrams(word string) []string {
 	var (
-		res       []string
-		lastCount = -1
-		lastWord  = make([]byte, len(word))
+		res        []string
+		swapBefore = len(word)
 	)
 
 	sortedWord := func(w string) string {
@@ -93,18 +91,13 @@ func (n *Node) Anagrams(word string) []string {
 		return strings.Join(s, "")
 	}(word)
 
-	for w := []byte(sortedWord); w != nil; w = permute(w) {
-		if lastCount >= 0 && reflect.DeepEqual(w[0:lastCount+1], lastWord[0:lastCount+1]) {
-			continue
-		}
-
+	for w := []byte(sortedWord); w != nil; w = permute(w, swapBefore+1) {
 		matches, count := n.findMatch(string(w))
 		if len(matches) > 0 {
 			res = append(res, matches...)
-			lastCount = -1
+			swapBefore = len(word)
 		} else {
-			lastCount = count
-			copy(lastWord, w)
+			swapBefore = count
 		}
 	}
 
@@ -146,8 +139,17 @@ func isValidWord(word string) bool {
 	return true
 }
 
-// permute returns the next permutation of the given input, in lexicographical ordering
-func permute(input []byte) []byte {
+// permute returns the next permutation of the given input, in lexicographical order.
+// swapBefore can be used to force a swap within a certain number characters.
+func permute(input []byte, swapBefore int) []byte {
+	if swapBefore < len(input)-1 {
+		input = append(input[0:swapBefore], func(w []byte) []byte {
+			s := strings.Split(string(w), "")
+			sort.Strings(s)
+			return reverse([]byte(strings.Join(s, "")), 0)
+		}(input[swapBefore:])...)
+	}
+
 	k, l := -1, -1
 	for i := range input {
 		if i+1 < len(input) && input[i] < input[i+1] {
@@ -163,12 +165,7 @@ func permute(input []byte) []byte {
 	}
 
 	input[k], input[l] = input[l], input[k]
-
-	for left, right := k+1, len(input)-1; left < right; left, right = left+1, right-1 {
-		input[left], input[right] = input[right], input[left]
-	}
-
-	return input
+	return reverse(input, k+1)
 }
 
 func unique(words []string) (res []string) {
@@ -180,4 +177,11 @@ func unique(words []string) (res []string) {
 		}
 	}
 	return
+}
+
+func reverse(input []byte, start int) []byte {
+	for left, right := start, len(input)-1; left < right; left, right = left+1, right-1 {
+		input[left], input[right] = input[right], input[left]
+	}
+	return input
 }
