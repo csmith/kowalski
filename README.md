@@ -13,3 +13,6 @@ It currently supports these commands:
 - `anagram <term>` returns all known anagrams that match the given term,
   where '?' is a single-character wildcard.
   e.g. `anagram lismem?` will return `melisma`.
+
+- `morse <term>` returns all possible words that match the given morse code
+  (specified using `-` and `.`), ignoring all spaces/pauses.

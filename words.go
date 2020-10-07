@@ -26,7 +26,13 @@ func (n *Node) append(word string) {
 	}
 }
 
-func (n *Node) valid(word string) bool {
+// IsPrefix indicates if the given string might be the prefix of a valid word.
+func (n *Node) IsPrefix(prefix string) bool {
+	return n.Roots.TestString(prefix)
+}
+
+// Valid indicates if the given word is found in the word list.
+func (n *Node) Valid(word string) bool {
 	if n.Master.TestString(word) == false {
 		return false
 	}
@@ -74,7 +80,7 @@ func (n *Node) findMatch(word string) ([]string, int) {
 
 	var res []string
 	for s := range stems {
-		if n.valid(stems[s]) {
+		if n.Valid(stems[s]) {
 			res = append(res, stems[s])
 		}
 	}

@@ -111,6 +111,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}()
 	}
 
+	if strings.HasPrefix(line, "morse") {
+		go func() {
+			word := strings.TrimSpace(strings.TrimPrefix(line, "morse"))
+			res := words.FromMorse(word)
+			sendMessage(s, m, fmt.Sprintf("Matches for %s: %v", word, res))
+		}()
+	}
+
 	if strings.HasPrefix(line, "memstats") {
 		go func() {
 			mem := &runtime.MemStats{}

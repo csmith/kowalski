@@ -12,12 +12,12 @@ func TestLoadWords(t *testing.T) {
 		return
 	}
 
-	if !words.valid("foo") {
+	if !words.Valid("foo") {
 		t.Errorf("'foo' element should be valid")
 		return
 	}
 
-	if words.valid("bazinga") {
+	if words.Valid("bazinga") {
 		t.Errorf("'bazinga' element should not be valid")
 		return
 	}
