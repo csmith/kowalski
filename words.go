@@ -3,29 +3,41 @@ package kowalski
 import (
 	"bufio"
 	"fmt"
+	"github.com/willf/bloom"
 	"os"
 	"sort"
 	"strings"
 )
 
 type Node struct {
-	Children [26]*Node
-	Valid    bool
-}
-
-func (n *Node) traverse(nextChar uint8) *Node {
-	if n.Children[nextChar-'a'] == nil {
-		n.Children[nextChar-'a'] = &Node{}
-	}
-	return n.Children[nextChar-'a']
+	Master      *bloom.BloomFilter
+	CrossChecks [2]*bloom.BloomFilter
+	Roots       *bloom.BloomFilter
+	Counter     int
 }
 
 func (n *Node) append(word string) {
-	if len(word) == 0 {
-		n.Valid = true
-	} else {
-		n.traverse(word[0]).append(word[1:])
+	n.Master.AddString(word)
+	n.CrossChecks[n.Counter].AddString(word)
+	n.Counter = (n.Counter + 1) % len(n.CrossChecks)
+
+	for i := range word {
+		n.Roots.AddString(word[0:i+1])
 	}
+}
+
+func (n *Node) valid(word string) bool {
+	if n.Master.TestString(word) == false {
+		return false
+	}
+
+	for i := range n.CrossChecks {
+		if n.CrossChecks[i].TestString(word) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Match returns all valid words that match the given input, expanding '?' as a single character wildcard
@@ -35,15 +47,10 @@ func (n *Node) Match(word string) []string {
 }
 
 func (n *Node) findMatch(word string) ([]string, int) {
-	type match struct {
-		text string
-		node *Node
-	}
-
 	maxLength := 0
-	stems := []*match{{"", n}}
+	stems := []string{""}
 	for offset := 0; offset < len(word) && len(stems) > 0; offset++ {
-		newStems := make([]*match, 0, len(stems))
+		newStems := make([]string, 0, len(stems))
 
 		var chars []uint8
 		if word[offset] == '?' {
@@ -54,12 +61,9 @@ func (n *Node) findMatch(word string) ([]string, int) {
 
 		for _, nextChar := range chars {
 			for s := range stems {
-				child := stems[s].node.Children[nextChar]
-				if child != nil {
-					newStems = append(newStems, &match{
-						text: fmt.Sprintf("%s%c", stems[s].text, 'a'+nextChar),
-						node: child,
-					})
+				word := fmt.Sprintf("%s%c", stems[s], 'a'+nextChar)
+				if n.Roots.TestString(word) {
+					newStems = append(newStems, word)
 				}
 			}
 		}
@@ -70,8 +74,8 @@ func (n *Node) findMatch(word string) ([]string, int) {
 
 	var res []string
 	for s := range stems {
-		if stems[s].node.Valid {
-			res = append(res, stems[s].text)
+		if n.valid(stems[s]) {
+			res = append(res, stems[s])
 		}
 	}
 	sort.Strings(res)
@@ -107,7 +111,14 @@ func (n *Node) Anagrams(word string) []string {
 
 // LoadWords reads all words from the given file and constructs a Trie for use in future operations
 func LoadWords(file string) (*Node, error) {
-	root := &Node{}
+	root := &Node{
+		Master: bloom.NewWithEstimates(4000000, 0.001),
+		CrossChecks: [2]*bloom.BloomFilter{
+			bloom.NewWithEstimates(2000000, 0.001),
+			bloom.NewWithEstimates(2000000, 0.001),
+		},
+		Roots: bloom.NewWithEstimates(4000000, 0.01),
+	}
 
 	f, err := os.Open(file)
 	if err != nil {

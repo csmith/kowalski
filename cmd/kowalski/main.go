@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"flag"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
@@ -8,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
 	"strings"
 	"syscall"
 )
@@ -22,10 +24,34 @@ var (
 func main() {
 	flag.Parse()
 
-	var err error
-	words, err = kowalski.LoadWords(*wordList)
-	if err != nil {
-		log.Panicf("Failed to load words: %v\n", err)
+	if strings.HasSuffix(*wordList, ".gob") {
+		f, err := os.Open(*wordList)
+		if err != nil {
+			log.Panicf("Failed to open word list: %v", err)
+		}
+
+		defer f.Close()
+
+		words = &kowalski.Node{}
+		if err = gob.NewDecoder(f).Decode(&words); err != nil {
+			log.Panicf("Unable to load cached word list: %v", err)
+		}
+	} else {
+		var err error
+		words, err = kowalski.LoadWords(*wordList)
+		if err != nil {
+			log.Panicf("Failed to load words: %v\n", err)
+		}
+
+		f, err := os.Create(fmt.Sprintf("%s.gob", *wordList))
+		if err != nil {
+			log.Printf("Unable to save cached word list: %v", err)
+		} else {
+			defer f.Close()
+			if err := gob.NewEncoder(f).Encode(words); err != nil {
+				log.Printf("Unable to encode cached word list: %v", err)
+			}
+		}
 	}
 
 	dg, err := discordgo.New("Bot " + *token)
@@ -82,6 +108,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			} else {
 				sendMessage(s, m, fmt.Sprintf("Invalid word: %s", word))
 			}
+		}()
+	}
+
+	if strings.HasPrefix(line, "memstats") {
+		go func() {
+			mem := &runtime.MemStats{}
+			runtime.ReadMemStats(mem)
+			sendMessage(s, m, fmt.Sprintf("Memory usage: TotalAlloc=%d Sys=%d HeapSys=%d StackSys=%d", mem.TotalAlloc, mem.Sys, mem.HeapSys, mem.StackSys))
 		}()
 	}
 }

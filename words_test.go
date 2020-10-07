@@ -12,24 +12,13 @@ func TestLoadWords(t *testing.T) {
 		return
 	}
 
-	if words.Valid {
-		t.Errorf("Root element should not be valid")
-		return
-	}
-
-	f := words.Children['f'-'a']
-	if f == nil {
-		t.Errorf("Root element must have an 'f' child")
-		return
-	}
-
-	if f.Valid {
-		t.Errorf("'f' element should not be valid")
-		return
-	}
-
-	if !f.Children['o'-'a'].Children['o'-'a'].Valid {
+	if !words.valid("foo") {
 		t.Errorf("'foo' element should be valid")
+		return
+	}
+
+	if words.valid("bazinga") {
+		t.Errorf("'bazinga' element should not be valid")
 		return
 	}
 }
@@ -93,13 +82,13 @@ func Test_permute(t *testing.T) {
 		swapBefore int
 		want       []byte
 	}{
-		{"Simple permutation 1", []byte("abc"), 3,[]byte("acb")},
+		{"Simple permutation 1", []byte("abc"), 3, []byte("acb")},
 		{"Simple permutation 2", []byte("acb"), 3, []byte("bac")},
 		{"Simple permutation 3", []byte("bac"), 3, []byte("bca")},
 		{"Simple permutation 4", []byte("bca"), 3, []byte("cab")},
 		{"Simple permutation 5", []byte("cab"), 3, []byte("cba")},
 		{"Simple permutation 6", []byte("cba"), 3, nil},
-		{"SwapBefore 1", []byte("abc"), 1,[]byte("bac")},
+		{"SwapBefore 1", []byte("abc"), 1, []byte("bac")},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
