@@ -1,0 +1,29 @@
+= Example compiled models
+
+This folder contains example spell checker models compiled from various sources.
+All entries are lowercase and contain ASCII 'a' - 'z' characters only (i.e., there
+are no hyphenated words, accents, apostrophes, etc).
+
+NB that these models do not contain the word lists themselves, they merely
+probabilistically predict whether a term is in the original word list.
+
+* link:combined.wl[combined.wl] (3.8MB) - 410k combined words from all the sources
+  below except for Urban Dictionary.
+
+* link:enable.wl[enable.wl] (1.6MB) - 170k words from the 'Enable' extension of the
+  Official Scrabble Player's Dictionary via https://github.com/dolph/dictionary
+
+* link:infochimps.wl[infochimps.wl] (3.4MB) - 370k alphanumeric words from
+  https://github.com/dwyl/english-words/
+
+* link:scowl-gb.wl[scowl-gb.wl] (1.3MB) - 130k words from the en-GB-large
+  SCOWL dictionary, from http://wordlist.aspell.net/
+
+* link:scowl-us.wl[scowl-us.wl] (1.3MB) - 130k words from the en-US-large
+  SCOWL dictionary, from http://wordlist.aspell.net/
+
+* link:urbandictionary.wl[urbandictionary.wl] (8.7MB) - 1M words from the Urban
+  Dictionary via https://github.com/mattbierner/urban-dictionary-word-list
+
+* link:websters.wl[websters.wl] (0.7MB) - 80k words from Webster's Unabridged Dictionary
+  via https://github.com/adambom/dictionary

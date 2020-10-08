@@ -6,7 +6,6 @@ import (
 )
 
 func TestFromMorse(t *testing.T) {
-	words, _ := LoadWords("testdata/test_words.txt")
 	tests := []struct {
 		name  string
 		query string
@@ -20,7 +19,7 @@ func TestFromMorse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := words.FromMorse(tt.query); !reflect.DeepEqual(got, tt.want) {
+			if got := FromMorse(testChecker, tt.query); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("FromMorse() = %v, want %v", got, tt.want)
 			}
 		})

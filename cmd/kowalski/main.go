@@ -1,57 +1,33 @@
 package main
 
 import (
-	"encoding/gob"
 	"flag"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/csmith/kowalski"
+	"github.com/csmith/kowalski/v2"
 	"log"
 	"os"
 	"os/signal"
 	"runtime"
+	"sort"
 	"strings"
 	"syscall"
 )
 
 var (
 	token    = flag.String("token", "", "Discord bot token")
-	wordList = flag.String("word-list", "wordlist.txt", "Path of the word list file")
+	goodModel = flag.String("good-model", "models/combined.wl", "Path of the 'good' model")
+	backupModel = flag.String("backup-model", "models/urbandictionary.wl", "Path of the 'backup' model")
 
-	words *kowalski.Node
+	checkers []*kowalski.SpellChecker
 )
 
 func main() {
 	flag.Parse()
 
-	if strings.HasSuffix(*wordList, ".gob") {
-		f, err := os.Open(*wordList)
-		if err != nil {
-			log.Panicf("Failed to open word list: %v", err)
-		}
-
-		defer f.Close()
-
-		words = &kowalski.Node{}
-		if err = gob.NewDecoder(f).Decode(&words); err != nil {
-			log.Panicf("Unable to load cached word list: %v", err)
-		}
-	} else {
-		var err error
-		words, err = kowalski.LoadWords(*wordList)
-		if err != nil {
-			log.Panicf("Failed to load words: %v\n", err)
-		}
-
-		f, err := os.Create(fmt.Sprintf("%s.gob", *wordList))
-		if err != nil {
-			log.Printf("Unable to save cached word list: %v", err)
-		} else {
-			defer f.Close()
-			if err := gob.NewEncoder(f).Encode(words); err != nil {
-				log.Printf("Unable to encode cached word list: %v", err)
-			}
-		}
+	checkers = []*kowalski.SpellChecker{
+		loadModel(*goodModel),
+		loadModel(*backupModel),
 	}
 
 	dg, err := discordgo.New("Bot " + *token)
@@ -80,6 +56,19 @@ func main() {
 	dg.Close()
 }
 
+func loadModel(path string) (res *kowalski.SpellChecker) {
+	f, err := os.Open(path)
+	if err != nil {
+		log.Panicf("Failed to open model: %v", err)
+	}
+	defer f.Close()
+	res, err = kowalski.LoadSpellChecker(f)
+	if err != nil {
+		log.Panicf("Failed to load model: %v", err)
+	}
+	return res
+}
+
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -91,7 +80,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go func() {
 			word := strings.TrimSpace(strings.TrimPrefix(line, "anagram"))
 			if isValidWord(word) {
-				res := words.Anagrams(word)
+				res := merge(kowalski.MultiplexAnagram(checkers, word, kowalski.Dedupe))
 				sendMessage(s, m, fmt.Sprintf("Anagrams for %s: %v", word, res))
 			} else {
 				sendMessage(s, m, fmt.Sprintf("Invalid word: %s", word))
@@ -103,7 +92,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go func() {
 			word := strings.TrimSpace(strings.TrimPrefix(line, "match"))
 			if isValidWord(word) {
-				res := words.Match(word)
+				res := merge(kowalski.MultiplexMatch(checkers, word, kowalski.Dedupe))
 				sendMessage(s, m, fmt.Sprintf("Matches for %s: %v", word, res))
 			} else {
 				sendMessage(s, m, fmt.Sprintf("Invalid word: %s", word))
@@ -114,7 +103,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.HasPrefix(line, "morse") {
 		go func() {
 			word := strings.TrimSpace(strings.TrimPrefix(line, "morse"))
-			res := words.FromMorse(word)
+			res := merge(kowalski.MultiplexFromMorse(checkers, word, kowalski.Dedupe))
 			sendMessage(s, m, fmt.Sprintf("Matches for %s: %v", word, res))
 		}()
 	}
@@ -126,6 +115,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			sendMessage(s, m, fmt.Sprintf("Memory usage: TotalAlloc=%d Sys=%d HeapSys=%d StackSys=%d", mem.TotalAlloc, mem.Sys, mem.HeapSys, mem.StackSys))
 		}()
 	}
+}
+
+func merge(words [][]string) []string {
+	var res []string
+	for i := range words {
+		for j := range words[i] {
+			if i > 0 {
+				res = append(res, fmt.Sprintf("%sᵁᴰ", words[i][j]))
+			} else {
+				res = append(res, words[i][j])
+			}
+		}
+	}
+	sort.Strings(res)
+	return res
 }
 
 func sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string) {
