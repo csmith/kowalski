@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	token    = flag.String("token", "", "Discord bot token")
-	goodModel = flag.String("good-model", "models/combined.wl", "Path of the 'good' model")
+	token       = flag.String("token", "", "Discord bot token")
+	goodModel   = flag.String("good-model", "models/combined.wl", "Path of the 'good' model")
 	backupModel = flag.String("backup-model", "models/urbandictionary.wl", "Path of the 'backup' model")
 
 	checkers []*kowalski.SpellChecker
@@ -120,6 +120,15 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}()
 	}
 
+	if strings.HasPrefix(line, "analysis") {
+		go func() {
+			res := kowalski.Analyse(strings.TrimSpace(strings.TrimPrefix(line, "analysis")))
+			if len(res) == 0 {
+				sendMessage(s, m, "Analysis: nothing interesting found")
+			}
+			sendMessage(s, m, fmt.Sprintf("Analysis:\n\t%s", strings.Join(res, "\n\t")))
+		}()
+	}
 
 	if strings.HasPrefix(line, "memstats") {
 		go func() {
