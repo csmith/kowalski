@@ -37,6 +37,13 @@ func MultiplexFromMorse(checkers []*SpellChecker, pattern string, opts ... Multi
 	}, opts)
 }
 
+// MultiplexFromT9 performs the FromT9 operation over a number of different checkers.
+func MultiplexFromT9(checkers []*SpellChecker, pattern string, opts ... MultiplexOption) [][]string {
+	return multiplex(checkers, func(checker *SpellChecker) []string {
+		return FromT9(checker, pattern)
+	}, opts)
+}
+
 func multiplex(checkers []*SpellChecker, f func(checker *SpellChecker)[]string, opts []MultiplexOption) [][]string {
 	o := &multiplexOptions{}
 	for i := range opts {

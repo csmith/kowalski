@@ -108,6 +108,19 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}()
 	}
 
+	if strings.HasPrefix(line, "t9") {
+		go func() {
+			word := strings.TrimSpace(strings.TrimPrefix(line, "t9"))
+			if isValidT9(word) {
+				res := merge(kowalski.MultiplexFromT9(checkers, word, kowalski.Dedupe))
+				sendMessage(s, m, fmt.Sprintf("Matches for %s: %v", word, res))
+			} else {
+				sendMessage(s, m, fmt.Sprintf("Invalid word: %s", word))
+			}
+		}()
+	}
+
+
 	if strings.HasPrefix(line, "memstats") {
 		go func() {
 			mem := &runtime.MemStats{}
@@ -148,6 +161,19 @@ func isValidWord(word string) bool {
 
 	for _, r := range word {
 		if (r < 'a' || r > 'z') && r != '?' {
+			return false
+		}
+	}
+	return true
+}
+
+func isValidT9(word string) bool {
+	if len(word) == 0 {
+		return false
+	}
+
+	for _, r := range word {
+		if r < '2' || r > '9' {
 			return false
 		}
 	}
