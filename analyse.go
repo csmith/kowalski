@@ -11,7 +11,7 @@ import (
 var nonLetterRegex = regexp.MustCompile("[^a-z]+")
 
 // Analyse performs various forms of text analysis on the input and returns findings.
-func Analyse(input string) []string {
+func Analyse(checker *SpellChecker, input string) []string {
 	var results []string
 
 	entropy := shannonEntropy(input)
@@ -29,6 +29,13 @@ func Analyse(input string) []string {
 			if consistsOf(cleaned, data.Index[name]) {
 				results = append(results, fmt.Sprintf("Consists entirely of %s", name))
 			}
+		}
+	}
+
+	shifts := CaesarShifts(input)
+	for i, s := range shifts {
+		if Score(checker, s) > 0.5 {
+			results = append(results, fmt.Sprintf("Caesar shift of %d might be English: %s", i, s))
 		}
 	}
 

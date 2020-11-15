@@ -122,7 +122,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if strings.HasPrefix(line, "analysis") {
 		go func() {
-			res := kowalski.Analyse(strings.TrimSpace(strings.TrimPrefix(line, "analysis")))
+			res := kowalski.Analyse(checkers[0], strings.TrimSpace(strings.TrimPrefix(line, "analysis")))
 			if len(res) == 0 {
 				sendMessage(s, m, "Analysis: nothing interesting found")
 			}
@@ -153,7 +153,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					s = fmt.Sprintf("**%s**", s)
 				}
 				out.WriteString(fmt.Sprintf("\t%2d: %s\n", i + 1, s))
-				fmt.Printf("%s - %f\n", s, score)
 			}
 			sendMessage(s, m, out.String())
 		}()
