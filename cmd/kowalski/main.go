@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/csmith/kowalski/v2"
+	"github.com/csmith/kowalski/v3"
 	"log"
 	"os"
 	"os/signal"

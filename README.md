@@ -32,7 +32,7 @@ of the number of words it will find:
 package example
 
 import (
-    "github.com/csmith/kowalski/v2"
+    "github.com/csmith/kowalski/v3"
     "os"
 )
 
@@ -52,7 +52,7 @@ models are available in the [models](models) directory. To load a model:
 package example
 
 import (
-    "github.com/csmith/kowalski/v2"
+    "github.com/csmith/kowalski/v3"
     "os"
 )
 
@@ -77,6 +77,9 @@ This repository also contains a Discord bot that allows users to perform analysi
 
 It currently supports these commands:
 
+- `analysis <term>` performs some analysis on the input and returns
+  hints about what it could be.
+
 - `match <term>` returns all known words that match the given term,
   where '?' is a single-character wildcard.
   e.g. `match melism?` will return `melisma`.
@@ -87,3 +90,10 @@ It currently supports these commands:
 
 - `morse <term>` returns all possible words that match the given morse code
   (specified using `-` and `.`), ignoring all spaces/pauses.
+  
+- `shift <term>` performs caesar shifts of 1-25 on the term and displays them.
+
+- `t9 <term>` returns all possible words that match the given T9 input
+  (specified using numbers).
+
+- `wordsearch <grid>` returns all found words in the word search.

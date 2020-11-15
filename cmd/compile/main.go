@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
-	"github.com/csmith/kowalski/v2"
+	"github.com/csmith/kowalski/v3"
 	"io"
 	"io/ioutil"
 	"log"

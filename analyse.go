@@ -2,7 +2,7 @@ package kowalski
 
 import (
 	"fmt"
-	"github.com/csmith/kowalski/v2/data"
+	"github.com/csmith/kowalski/v3/data"
 	"math"
 	"regexp"
 	"strings"
