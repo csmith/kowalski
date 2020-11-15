@@ -41,6 +41,24 @@ func Analyse(input string) []string {
 	return results
 }
 
+// Score assigns a score to an input showing how likely it is to be English text. A score of 1.0 means almost
+// certainly English, a score of 0.0 means almost certainly not. This is fairly arbitrary and may not be very good.
+func Score(checker *SpellChecker, input string) float64 {
+	const targetDensity = 2.0
+	density := float64(len(FindWords(checker, input))) / float64(len(input))
+	densityScore := math.Max(1 - math.Abs(density - targetDensity), 0.1)
+
+	entropy := shannonEntropy(input)
+	entropyScore := 1.0
+	if entropy < 3.5 {
+		entropyScore = math.Max(entropy / 3.5, 0.1)
+	} else if entropy > 5 {
+		entropyScore = math.Max(1 - (entropy - 5) / 3, 0.1)
+	}
+
+	return densityScore * entropyScore
+}
+
 // consistsOf determines if the given input consists _entirely_ of terms in the given slice. The input is expected
 // to be lowercase, and with any irrelevant characters removed.
 func consistsOf(input string, terms []string) bool {

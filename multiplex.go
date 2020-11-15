@@ -30,6 +30,13 @@ func MultiplexAnagram(checkers []*SpellChecker, pattern string, opts ... Multipl
 	}, opts)
 }
 
+// MultiplexFindWords performs the FindWords operation over a number of different checkers.
+func MultiplexFindWords(checkers []*SpellChecker, pattern string, opts ... MultiplexOption) [][]string {
+	return multiplex(checkers, func(checker *SpellChecker) []string {
+		return FindWords(checker, pattern)
+	}, opts)
+}
+
 // MultiplexFromMorse performs the FromMorse operation over a number of different checkers.
 func MultiplexFromMorse(checkers []*SpellChecker, pattern string, opts ... MultiplexOption) [][]string {
 	return multiplex(checkers, func(checker *SpellChecker) []string {
@@ -41,6 +48,13 @@ func MultiplexFromMorse(checkers []*SpellChecker, pattern string, opts ... Multi
 func MultiplexFromT9(checkers []*SpellChecker, pattern string, opts ... MultiplexOption) [][]string {
 	return multiplex(checkers, func(checker *SpellChecker) []string {
 		return FromT9(checker, pattern)
+	}, opts)
+}
+
+// MultiplexWordSearch performs the WordSearch operation over a number of different checkers.
+func MultiplexWordSearch(checkers []*SpellChecker, pattern []string, opts ... MultiplexOption) [][]string {
+	return multiplex(checkers, func(checker *SpellChecker) []string {
+		return WordSearch(checker, pattern)
 	}, opts)
 }
 

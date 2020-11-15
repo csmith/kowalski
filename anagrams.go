@@ -61,21 +61,3 @@ func permute(input []byte, swapBefore int) []byte {
 	input[k], input[l] = input[l], input[k]
 	return reverse(input, k+1)
 }
-
-func unique(words []string) (res []string) {
-	last := ""
-	for _, w := range words {
-		if w != last {
-			res = append(res, w)
-			last = w
-		}
-	}
-	return
-}
-
-func reverse(input []byte, start int) []byte {
-	for left, right := start, len(input)-1; left < right; left, right = left+1, right-1 {
-		input[left], input[right] = input[right], input[left]
-	}
-	return input
-}

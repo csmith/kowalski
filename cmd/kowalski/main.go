@@ -130,6 +130,35 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}()
 	}
 
+	if strings.HasPrefix(line, "wordsearch") {
+		go func() {
+			input := strings.Split(strings.TrimSpace(strings.TrimPrefix(line, "wordsearch")), "\n")
+			res := kowalski.MultiplexWordSearch(checkers, input)
+			sendMessage(s, m, fmt.Sprintf(
+				"Words found:\n\nNormal: %s\n\nUD: %s",
+				strings.Join(countReps(res[0]), ", "),
+				strings.Join(countReps(subtract(res[1], res[0])), ", ")))
+		}()
+	}
+
+	if strings.HasPrefix(line, "shift") {
+		go func() {
+			input := strings.TrimSpace(strings.TrimPrefix(line, "shift"))
+			res := kowalski.CaesarShifts(input)
+			out := strings.Builder{}
+			out.WriteString( "Caesar shifts:\n")
+			for i, s := range res {
+				score := kowalski.Score(checkers[0], s)
+				if score > 0.5 {
+					s = fmt.Sprintf("**%s**", s)
+				}
+				out.WriteString(fmt.Sprintf("\t%2d: %s\n", i + 1, s))
+				fmt.Printf("%s - %f\n", s, score)
+			}
+			sendMessage(s, m, out.String())
+		}()
+	}
+
 	if strings.HasPrefix(line, "memstats") {
 		go func() {
 			mem := &runtime.MemStats{}
@@ -139,18 +168,64 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+func subtract(input, exclusions []string) []string {
+	var res []string
+	for i := range input {
+		excluded := false
+		for j := range exclusions {
+			if exclusions[j] == input[i] {
+				excluded = true
+				break
+			}
+		}
+		if !excluded {
+			res = append(res, input[i])
+		}
+	}
+	return res
+}
+
 func merge(words [][]string) []string {
 	var res []string
 	for i := range words {
 		for j := range words[i] {
 			if i > 0 {
-				res = append(res, fmt.Sprintf("%sᵁᴰ", words[i][j]))
+				res = append(res, fmt.Sprintf("_%s_", words[i][j]))
 			} else {
-				res = append(res, words[i][j])
+				res = append(res, fmt.Sprintf("**%s**", words[i][j]))
 			}
 		}
 	}
 	sort.Strings(res)
+	return res
+}
+
+func countReps(input []string) []string {
+	sort.Strings(input)
+
+	var res []string
+	var last string
+	var count int
+	for i := range input {
+		if input[i] == last {
+			count++
+			continue
+		} else if count > 1 {
+			res = append(res, fmt.Sprintf("**%s × %d**", last, count))
+			count = 0
+		} else if count == 1 {
+			res = append(res, last)
+			count = 0
+		}
+		last = input[i]
+		count = 1
+	}
+
+	if count > 1 {
+		res = append(res, fmt.Sprintf("%s × %d", last, count))
+	} else if count == 1 {
+		res = append(res, last)
+	}
 	return res
 }
 
