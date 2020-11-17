@@ -1,7 +1,6 @@
 package kowalski
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -30,9 +29,6 @@ func WordSearch(checker *SpellChecker, input []string) []string {
 	lines := wordSearchLines(input)
 	for i := range lines {
 		words := FindWords(checker, lines[i])
-		if strings.Contains(lines[i], "melisma") {
-			fmt.Printf("%v\n", words)
-		}
 		for j := range words {
 			if len(words[j]) >= 4 {
 				res = append(res, words[j])

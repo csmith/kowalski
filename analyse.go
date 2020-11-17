@@ -33,10 +33,34 @@ func Analyse(checker *SpellChecker, input string) []string {
 	}
 
 	shifts := CaesarShifts(input)
+	bestScore, bestShift := 0.0, 0
 	for i, s := range shifts {
-		if Score(checker, s) > 0.5 {
-			results = append(results, fmt.Sprintf("Caesar shift of %d might be English: %s", i, s))
+		score := Score(checker, s)
+		if score > bestScore {
+			bestScore = score
+			bestShift = i
 		}
+	}
+	if bestScore > 0.5 {
+		results = append(results, fmt.Sprintf("Caesar shift of %d might be English: %s", bestShift, shifts[bestShift]))
+	}
+
+	odds := strings.Builder{}
+	evens := strings.Builder{}
+	for i := range input {
+		if i % 2 == 0 {
+			evens.WriteByte(input[i])
+		} else {
+			odds.WriteByte(input[i])
+		}
+	}
+
+	if Score(checker, odds.String()) > 0.5 {
+		results = append(results, fmt.Sprintf("Alternating characters might be English: %s", odds.String()))
+	}
+
+	if Score(checker, evens.String()) > 0.5 {
+		results = append(results, fmt.Sprintf("Alternating characters might be English: %s", evens.String()))
 	}
 
 	if len(input) % 8 == 0 {
