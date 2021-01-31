@@ -145,6 +145,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			for i := range res {
 				message.WriteByte(byte(i + 'A'))
 				message.WriteString(": ")
+				if res[i] > 0 {
+					message.WriteRune('▕')
+				}
 				for j := 0; j < int(targetWidth * (float64(res[i]) / float64(max))); j++ {
 					message.WriteRune('█')
 				}
