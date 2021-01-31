@@ -69,11 +69,30 @@ func Analyse(checker *SpellChecker, input string) []string {
 		results = append(results, "Multiple of 8 A-Z characters - might be encoded binary?")
 	}
 
+	dists := LetterDistribution(input)
+	present := 0
+	for i := range dists {
+		if dists[i] > 0 {
+			present++
+		}
+	}
+
+	if present > 20 {
+		message := strings.Builder{}
+		message.WriteString("Contains all english letters except for: ")
+		for i := range dists {
+			if dists[i] == 0 {
+				message.WriteByte(byte('A' + i))
+			}
+		}
+		results = append(results, message.String())
+	}
+
 	return results
 }
 
 // Score assigns a score to an input showing how likely it is to be English text. A score of 1.0 means almost
-// certainly English, a score of 0.0 means almost certainly not. This is fairly arbitrary and may not be very good.
+// certainly English, a score of 0.0 means almost certainly not. This is fairly arbitrary and is not very good.
 func Score(checker *SpellChecker, input string) float64 {
 	const targetDensity = 2.0
 	density := float64(len(FindWords(checker, input))) / float64(len(input))
@@ -119,4 +138,18 @@ func shannonEntropy(input string) float64 {
 		}
 	}
 	return entropy
+}
+
+// LetterDistribution counts the number of the occurrences of each English letter (ignoring case).
+func LetterDistribution(input string) [26]int {
+	var res [26]int
+	for i := range input {
+		if input[i] >= 'a' && input[i] <= 'z' {
+			res[input[i] - 'a']++
+		}
+		if input[i] >= 'A' && input[i] <= 'Z' {
+			res[input[i] - 'A']++
+		}
+	}
+	return res
 }

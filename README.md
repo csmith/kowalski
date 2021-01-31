@@ -88,6 +88,9 @@ It currently supports these commands:
   where '?' is a single-character wildcard.
   e.g. `anagram lismem?` will return `melisma`.
 
+- `letters <term>` shows a chart of the distribution of the English letters
+  (A-Z, ignoring case) in the given term.
+
 - `morse <term>` returns all possible words that match the given morse code
   (specified using `-` and `.`), ignoring all spaces/pauses.
   

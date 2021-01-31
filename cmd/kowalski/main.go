@@ -130,6 +130,31 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}()
 	}
 
+	if strings.HasPrefix(line, "letters") {
+		go func() {
+			res := kowalski.LetterDistribution(strings.TrimSpace(strings.TrimPrefix(line, "letters")))
+			max := 0
+			for i := range res {
+				if res[i] > max {
+					max = res[i]
+				}
+			}
+			const targetWidth = 20
+			message := strings.Builder{}
+			message.WriteString("Letter distribution:\n```")
+			for i := range res {
+				message.WriteByte(byte(i + 'A'))
+				message.WriteString(": ")
+				for j := 0; j < int(targetWidth * (float64(res[i]) / float64(max))); j++ {
+					message.WriteRune('█')
+				}
+				message.WriteString(fmt.Sprintf(" %d\n", res[i]))
+			}
+			message.WriteString("```")
+			sendMessage(s, m, message.String())
+		}()
+	}
+
 	if strings.HasPrefix(line, "wordsearch") {
 		go func() {
 			input := strings.Split(strings.TrimSpace(strings.TrimPrefix(line, "wordsearch")), "\n")
