@@ -3,21 +3,23 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"github.com/csmith/kowalski/v3"
 	"log"
 	"os"
 	"os/signal"
-	"runtime"
 	"sort"
 	"strings"
 	"syscall"
+	"unicode"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/csmith/kowalski/v3"
 )
 
 var (
 	token       = flag.String("token", "", "Discord bot token")
 	goodModel   = flag.String("good-model", "models/combined.wl", "Path of the 'good' model")
 	backupModel = flag.String("backup-model", "models/urbandictionary.wl", "Path of the 'backup' model")
+	prefix      = flag.String("prefix", "!", "Character(s) to require before commands")
 
 	checkers []*kowalski.SpellChecker
 )
@@ -30,18 +32,15 @@ func main() {
 		loadModel(*backupModel),
 	}
 
-	dg, err := discordgo.New("Bot " + *token)
+	dg, err := discordgo.New(fmt.Sprintf("Bot %s", *token))
 	if err != nil {
 		fmt.Println("error creating Discord session,", err)
 		return
 	}
 
-	// Register the messageCreate func as a callback for MessageCreate events.
-	dg.AddHandler(messageCreate)
+	dg.AddHandler(handleMessage)
 
-	// Open a websocket connection to Discord and begin listening.
-	err = dg.Open()
-	if err != nil {
+	if err := dg.Open(); err != nil {
 		fmt.Println("error opening connection,", err)
 		return
 	}
@@ -62,6 +61,7 @@ func loadModel(path string) (res *kowalski.SpellChecker) {
 		log.Panicf("Failed to open model: %v", err)
 	}
 	defer f.Close()
+
 	res, err = kowalski.LoadSpellChecker(f)
 	if err != nil {
 		log.Panicf("Failed to load model: %v", err)
@@ -69,129 +69,23 @@ func loadModel(path string) (res *kowalski.SpellChecker) {
 	return res
 }
 
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
 	line := strings.ToLower(m.Content)
 
-	if strings.HasPrefix(line, "anagram") {
-		go func() {
-			word := strings.TrimSpace(strings.TrimPrefix(line, "anagram"))
-			if isValidWord(word) {
-				res := merge(kowalski.MultiplexAnagram(checkers, word, kowalski.Dedupe))
-				sendMessage(s, m, fmt.Sprintf("Anagrams for %s: %v", word, res))
-			} else {
-				sendMessage(s, m, fmt.Sprintf("Invalid word: %s", word))
+	for k := range commands {
+		if pfx := fmt.Sprintf("%s%s", *prefix, k); strings.HasPrefix(line, pfx) {
+			remaining := strings.TrimPrefix(line, pfx)
+			runes := []rune(remaining)
+			if len(runes) == 0 || unicode.IsSpace(runes[0]) {
+				commands[k](strings.TrimSpace(remaining), func(format string, a ...interface{}) {
+					sendMessage(s, m, fmt.Sprintf(format, a...))
+				})
 			}
-		}()
-	}
-
-	if strings.HasPrefix(line, "match") {
-		go func() {
-			word := strings.TrimSpace(strings.TrimPrefix(line, "match"))
-			if isValidWord(word) {
-				res := merge(kowalski.MultiplexMatch(checkers, word, kowalski.Dedupe))
-				sendMessage(s, m, fmt.Sprintf("Matches for %s: %v", word, res))
-			} else {
-				sendMessage(s, m, fmt.Sprintf("Invalid word: %s", word))
-			}
-		}()
-	}
-
-	if strings.HasPrefix(line, "morse") {
-		go func() {
-			word := strings.TrimSpace(strings.TrimPrefix(line, "morse"))
-			res := merge(kowalski.MultiplexFromMorse(checkers, word, kowalski.Dedupe))
-			sendMessage(s, m, fmt.Sprintf("Matches for %s: %v", word, res))
-		}()
-	}
-
-	if strings.HasPrefix(line, "t9") {
-		go func() {
-			word := strings.TrimSpace(strings.TrimPrefix(line, "t9"))
-			if isValidT9(word) {
-				res := merge(kowalski.MultiplexFromT9(checkers, word, kowalski.Dedupe))
-				sendMessage(s, m, fmt.Sprintf("Matches for %s: %v", word, res))
-			} else {
-				sendMessage(s, m, fmt.Sprintf("Invalid word: %s", word))
-			}
-		}()
-	}
-
-	if strings.HasPrefix(line, "analysis") {
-		go func() {
-			res := kowalski.Analyse(checkers[0], strings.TrimSpace(strings.TrimPrefix(line, "analysis")))
-			if len(res) == 0 {
-				sendMessage(s, m, "Analysis: nothing interesting found")
-			}
-			sendMessage(s, m, fmt.Sprintf("Analysis:\n\t%s", strings.Join(res, "\n\t")))
-		}()
-	}
-
-	if strings.HasPrefix(line, "letters") {
-		go func() {
-			res := kowalski.LetterDistribution(strings.TrimSpace(strings.TrimPrefix(line, "letters")))
-			max := 0
-			for i := range res {
-				if res[i] > max {
-					max = res[i]
-				}
-			}
-			const targetWidth = 20
-			message := strings.Builder{}
-			message.WriteString("Letter distribution:\n```")
-			for i := range res {
-				message.WriteByte(byte(i + 'A'))
-				message.WriteString(": ")
-				if res[i] > 0 {
-					message.WriteRune('▕')
-				}
-				for j := 0; j < int(targetWidth * (float64(res[i]) / float64(max))); j++ {
-					message.WriteRune('█')
-				}
-				message.WriteString(fmt.Sprintf(" %d\n", res[i]))
-			}
-			message.WriteString("```")
-			sendMessage(s, m, message.String())
-		}()
-	}
-
-	if strings.HasPrefix(line, "wordsearch") {
-		go func() {
-			input := strings.Split(strings.TrimSpace(strings.TrimPrefix(line, "wordsearch")), "\n")
-			res := kowalski.MultiplexWordSearch(checkers, input)
-			sendMessage(s, m, fmt.Sprintf(
-				"Words found:\n\nNormal: %s\n\nUD: %s",
-				strings.Join(countReps(res[0]), ", "),
-				strings.Join(countReps(subtract(res[1], res[0])), ", ")))
-		}()
-	}
-
-	if strings.HasPrefix(line, "shift") {
-		go func() {
-			input := strings.TrimSpace(strings.TrimPrefix(line, "shift"))
-			res := kowalski.CaesarShifts(input)
-			out := strings.Builder{}
-			out.WriteString( "Caesar shifts:\n")
-			for i, s := range res {
-				score := kowalski.Score(checkers[0], s)
-				if score > 0.5 {
-					s = fmt.Sprintf("**%s**", s)
-				}
-				out.WriteString(fmt.Sprintf("\t%2d: %s\n", i + 1, s))
-			}
-			sendMessage(s, m, out.String())
-		}()
-	}
-
-	if strings.HasPrefix(line, "memstats") {
-		go func() {
-			mem := &runtime.MemStats{}
-			runtime.ReadMemStats(mem)
-			sendMessage(s, m, fmt.Sprintf("Memory usage: TotalAlloc=%d Sys=%d HeapSys=%d StackSys=%d", mem.TotalAlloc, mem.Sys, mem.HeapSys, mem.StackSys))
-		}()
+		}
 	}
 }
 
