@@ -2,10 +2,11 @@ package kowalski
 
 import (
 	"fmt"
-	"github.com/csmith/kowalski/v3/data"
 	"math"
 	"regexp"
 	"strings"
+
+	"github.com/csmith/kowalski/v3/data"
 )
 
 var nonLetterRegex = regexp.MustCompile("[^a-z]+")
@@ -26,8 +27,12 @@ func Analyse(checker *SpellChecker, input string) []string {
 	cleaned := nonLetterRegex.ReplaceAllString(strings.ToLower(input), "")
 	if len(cleaned) > 0 {
 		for name := range data.Index {
-			if consistsOf(cleaned, data.Index[name]) {
-				results = append(results, fmt.Sprintf("Consists entirely of %s", name))
+			if terms, ok := splitTerms(cleaned, nil, data.Index[name]); ok {
+				if sameLength(data.Index[name]) {
+					results = append(results, fmt.Sprintf("Consists entirely of %s", name))
+				} else {
+					results = append(results, fmt.Sprintf("Consists entirely of %s: %s", name, strings.Join(terms, ", ")))
+				}
 			}
 		}
 	}
@@ -48,7 +53,7 @@ func Analyse(checker *SpellChecker, input string) []string {
 	odds := strings.Builder{}
 	evens := strings.Builder{}
 	for i := range input {
-		if i % 2 == 0 {
+		if i%2 == 0 {
 			evens.WriteByte(input[i])
 		} else {
 			odds.WriteByte(input[i])
@@ -63,9 +68,9 @@ func Analyse(checker *SpellChecker, input string) []string {
 		results = append(results, fmt.Sprintf("Alternating characters might be English: %s", evens.String()))
 	}
 
-	if len(input) % 8 == 0 {
+	if len(input)%8 == 0 {
 		results = append(results, "Multiple of 8 characters - might be encoded binary?")
-	} else if len(cleaned) % 8 == 0 {
+	} else if len(cleaned)%8 == 0 {
 		results = append(results, "Multiple of 8 A-Z characters - might be encoded binary?")
 	}
 
@@ -96,30 +101,33 @@ func Analyse(checker *SpellChecker, input string) []string {
 func Score(checker *SpellChecker, input string) float64 {
 	const targetDensity = 2.0
 	density := float64(len(FindWords(checker, input))) / float64(len(input))
-	densityScore := math.Max(1 - math.Abs(density - targetDensity), 0.1)
+	densityScore := math.Max(1-math.Abs(density-targetDensity), 0.1)
 
 	entropy := shannonEntropy(input)
 	entropyScore := 1.0
 	if entropy < 3.5 {
-		entropyScore = math.Max(entropy / 3.5, 0.1)
+		entropyScore = math.Max(entropy/3.5, 0.1)
 	} else if entropy > 5 {
-		entropyScore = math.Max(1 - (entropy - 5) / 3, 0.1)
+		entropyScore = math.Max(1-(entropy-5)/3, 0.1)
 	}
 
 	return densityScore * entropyScore
 }
 
-// consistsOf determines if the given input consists _entirely_ of terms in the given slice. The input is expected
+// splitTerms splits the input up into a list of the given terms. The input is expected
 // to be lowercase, and with any irrelevant characters removed.
-func consistsOf(input string, terms []string) bool {
+func splitTerms(input string, prefix, terms []string) ([]string, bool) {
 	for i := range terms {
 		if strings.HasPrefix(input, strings.ToLower(terms[i])) {
-			if len(input) == len(terms[i]) || consistsOf(input[len(terms[i]):], terms) {
-				return true
+			newPrefix := append(prefix, terms[i])
+			if len(input) == len(terms[i]) {
+				return newPrefix, true
+			} else if res, ok := splitTerms(input[len(terms[i]):], newPrefix, terms); ok {
+				return res, true
 			}
 		}
 	}
-	return false
+	return nil, false
 }
 
 // shannonEntropy calculates the Shannon Entropy of the input.
@@ -140,15 +148,29 @@ func shannonEntropy(input string) float64 {
 	return entropy
 }
 
+func sameLength(terms []string) bool {
+	if len(terms) == 0 {
+		return true
+	}
+
+	target := len(terms[0])
+	for i := range terms {
+		if len(terms[i]) != target {
+			return false
+		}
+	}
+	return true
+}
+
 // LetterDistribution counts the number of the occurrences of each English letter (ignoring case).
 func LetterDistribution(input string) [26]int {
 	var res [26]int
 	for i := range input {
 		if input[i] >= 'a' && input[i] <= 'z' {
-			res[input[i] - 'a']++
+			res[input[i]-'a']++
 		}
 		if input[i] >= 'A' && input[i] <= 'Z' {
-			res[input[i] - 'A']++
+			res[input[i]-'A']++
 		}
 	}
 	return res
