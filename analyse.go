@@ -84,10 +84,13 @@ func Analyse(checker *SpellChecker, input string) []string {
 
 	if present > 20 {
 		message := strings.Builder{}
-		message.WriteString("Contains all english letters except for: ")
-		for i := range dists {
-			if dists[i] == 0 {
-				message.WriteByte(byte('A' + i))
+		message.WriteString("Contains all english letters")
+		if present < 26 {
+			message.WriteString(" except for: ")
+			for i := range dists {
+				if dists[i] == 0 {
+					message.WriteByte(byte('A' + i))
+				}
 			}
 		}
 		results = append(results, message.String())
