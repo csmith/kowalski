@@ -42,6 +42,7 @@ func init() {
 	addCommand(Morse, "Attempts to split a morse code input to spell a single word", "morse")
 	addCommand(Shift, "Shows the result of the 25 possible caesar shifts", "shift", "caesar")
 	addCommand(T9, "Attempts to treat a series of numbers as T9 input to spell a single word", "t9")
+	addCommand(Transpose, "Transposes columns to rows and rows to columns", "transpose")
 	addCommand(WordSearch, "Searches for words in the given text grid", "wordsearch")
 	addCommand(Help, "Shows this help text", "help")
 }
@@ -151,6 +152,10 @@ func T9(input string, reply Replier) {
 	} else {
 		reply("Invalid word: %s", input)
 	}
+}
+
+func Transpose(input string, reply Replier) {
+	reply("Transposed:\n\n%s", strings.Join(kowalski.Transpose(strings.Split(input, "\n")), "\n"))
 }
 
 func WordSearch(input string, reply Replier) {
