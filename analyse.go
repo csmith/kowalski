@@ -31,7 +31,7 @@ func Analyse(checker *SpellChecker, input string) []string {
 				if sameLength(data.Index[name]) {
 					results = append(results, fmt.Sprintf("Consists entirely of %s", name))
 				} else {
-					results = append(results, fmt.Sprintf("Consists entirely of %s: %s", name, strings.Join(terms, ", ")))
+					results = append(results, fmt.Sprintf("Consists entirely of %s: %s", name, strings.Join(terms, " ")))
 				}
 			}
 		}

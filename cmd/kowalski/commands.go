@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/csmith/kowalski/v3"
@@ -35,6 +36,7 @@ func addCommand(c Command, help string, names ...string) {
 func init() {
 	addCommand(Anagram, "Attempts to find single-word anagrams, expanding '\\*' and '?' wildcards", "anagram")
 	addCommand(Analysis, "Analyses text and provides a summary of potentially interesting findings", "analysis", "analyze", "analyse")
+	addCommand(Chunk, "Splits the text into chunks of a given size", "chunk")
 	addCommand(Letters, "Shows a frequency histogram of the number of letters in the input", "letters")
 	addCommand(Match, "Attempts to expand '\\*' and '?' wildcards to find a single-word match", "match")
 	addCommand(Morse, "Attempts to split a morse code input to spell a single word", "morse")
@@ -45,6 +47,7 @@ func init() {
 }
 
 func Anagram(input string, reply Replier) {
+	input = strings.ToLower(input)
 	if isValidWord(input) {
 		res := merge(kowalski.MultiplexAnagram(checkers, input, kowalski.Dedupe))
 		reply("Anagrams for %s: %v", input, res)
@@ -54,11 +57,32 @@ func Anagram(input string, reply Replier) {
 }
 
 func Analysis(input string, reply Replier) {
+	input = strings.ToLower(input)
 	res := kowalski.Analyse(checkers[0], input)
 	if len(res) == 0 {
 		reply("Analysis: nothing interesting found")
 	}
 	reply("Analysis:\n\t%s", strings.Join(res, "\n\t"))
+}
+
+func Chunk(input string, reply Replier) {
+	var parts []int
+	words := strings.Split(input, " ")
+	for i := range words {
+		if v, err := strconv.Atoi(words[i]); err == nil {
+			parts = append(parts, v)
+		} else {
+			break
+		}
+	}
+
+	if len(parts) == 0 {
+		reply("Usage: chunk <size> [size [size [...]]] <text>")
+		return
+	}
+
+	text := strings.Join(words[len(parts):], "")
+	reply("Chunked: %s", strings.Join(kowalski.Chunk(text, parts...), " "))
 }
 
 func Help(_ string, reply Replier) {
@@ -92,6 +116,7 @@ func Letters(input string, reply Replier) {
 }
 
 func Match(input string, reply Replier) {
+	input = strings.ToLower(input)
 	if isValidWord(input) {
 		res := merge(kowalski.MultiplexMatch(checkers, input, kowalski.Dedupe))
 		reply("Matches for %s: %v", input, res)
@@ -129,6 +154,7 @@ func T9(input string, reply Replier) {
 }
 
 func WordSearch(input string, reply Replier) {
+	input = strings.ToLower(input)
 	res := kowalski.MultiplexWordSearch(checkers, strings.Split(input, "\n"))
 	reply(
 		"Words found:\n\nNormal: %s\n\nUD: %s",

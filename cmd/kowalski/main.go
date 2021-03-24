@@ -74,7 +74,7 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	line := strings.ToLower(m.Content)
+	line := m.Content
 
 	for k := range commands {
 		if pfx := fmt.Sprintf("%s%s", *prefix, k); strings.HasPrefix(line, pfx) {
