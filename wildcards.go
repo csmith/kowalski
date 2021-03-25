@@ -12,6 +12,26 @@ func Match(checker *SpellChecker, pattern string) []string {
 	return res
 }
 
+// OffByOne returns all words that can be made by performing one character change on the input. The input is
+// assumed to be a single, lowercase word containing a-z chars only.
+func OffByOne(checker *SpellChecker, input string) []string {
+	words := map[string]bool{}
+	for i := range input {
+		res := Match(checker, fmt.Sprintf("%s?%s", input[0:i], input[i+1:]))
+		for j := range res {
+			words[res[j]] = true
+		}
+	}
+
+	var res []string
+	for w := range words {
+		if w != input {
+			res = append(res, w)
+		}
+	}
+	return res
+}
+
 // findMatch returns all valid words that match the given pattern, expanding '?' as a single character wildcard.
 // It will aggressively skip sequences that don't form valid prefixes; the maximum valid prefix length is returned as
 // the second parameter (for cases where matches are returned, this will equal len(word)).

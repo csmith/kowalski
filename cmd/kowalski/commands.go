@@ -40,6 +40,7 @@ func init() {
 	addCommand(Letters, "Shows a frequency histogram of the number of letters in the input", "letters")
 	addCommand(Match, "Attempts to expand '\\*' and '?' wildcards to find a single-word match", "match")
 	addCommand(Morse, "Attempts to split a morse code input to spell a single word", "morse")
+	addCommand(OffByOne, "Finds all words that are one character different from the input", "obo", "offbyone", "ob1")
 	addCommand(Shift, "Shows the result of the 25 possible caesar shifts", "shift", "caesar")
 	addCommand(T9, "Attempts to treat a series of numbers as T9 input to spell a single word", "t9")
 	addCommand(Transpose, "Transposes columns to rows and rows to columns", "transpose")
@@ -129,6 +130,16 @@ func Match(input string, reply Replier) {
 func Morse(input string, reply Replier) {
 	res := merge(kowalski.MultiplexFromMorse(checkers, input, kowalski.Dedupe))
 	reply("Matches for %s: %v", input, res)
+}
+
+func OffByOne(input string, reply Replier) {
+	input = strings.ToLower(input)
+	if isValidWord(input) {
+		res := merge(kowalski.MultiplexOffByOne(checkers, input, kowalski.Dedupe))
+		reply("Off-by-ones for %s: %v", input, res)
+	} else {
+		reply("Invalid word: %s", input)
+	}
 }
 
 func Shift(input string, reply Replier) {

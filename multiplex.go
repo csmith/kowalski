@@ -44,6 +44,13 @@ func MultiplexFromMorse(checkers []*SpellChecker, pattern string, opts ... Multi
 	}, opts)
 }
 
+// MultiplexOffByOne performs the OffByOne operation over a number of different checkers.
+func MultiplexOffByOne(checkers []*SpellChecker, pattern string, opts ... MultiplexOption) [][]string {
+	return multiplex(checkers, func(checker *SpellChecker) []string {
+		return OffByOne(checker, pattern)
+	}, opts)
+}
+
 // MultiplexFromT9 performs the FromT9 operation over a number of different checkers.
 func MultiplexFromT9(checkers []*SpellChecker, pattern string, opts ... MultiplexOption) [][]string {
 	return multiplex(checkers, func(checker *SpellChecker) []string {
