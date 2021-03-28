@@ -43,7 +43,7 @@ func Analyse(checker *SpellChecker, input string) []string {
 		score := Score(checker, s)
 		if score > bestScore {
 			bestScore = score
-			bestShift = i
+			bestShift = i + 1
 		}
 	}
 	if bestScore > 0.5 {
