@@ -9,43 +9,25 @@ import (
 )
 
 type Replier func(format string, a ...interface{})
-type Command func(input string, reply Replier)
+type TextCommand func(input string, reply Replier)
 
-var commands = map[string]Command{}
-var helpText = strings.Builder{}
-
-func addCommand(c Command, help string, names ...string) {
-	for i := range names {
-		commands[names[i]] = c
-	}
-
-	helpText.WriteString(fmt.Sprintf("\n\t**%s%s**", *prefix, names[0]))
-	helpText.WriteString(fmt.Sprintf(" _%s_", help))
-	if len(names) > 1 {
-		helpText.WriteString(" [Aliases: ")
-		for i := range names[1:] {
-			if i > 0 {
-				helpText.WriteString(", ")
-			}
-			helpText.WriteString(fmt.Sprintf("%s%s", *prefix, names[1+i]))
-		}
-		helpText.WriteString("]")
-	}
+type HelpInfo struct {
+	Triggers []string
+	Message  string
 }
 
-func init() {
-	addCommand(Anagram, "Attempts to find single-word anagrams, expanding '\\*' and '?' wildcards", "anagram")
-	addCommand(Analysis, "Analyses text and provides a summary of potentially interesting findings", "analysis", "analyze", "analyse")
-	addCommand(Chunk, "Splits the text into chunks of a given size", "chunk")
-	addCommand(Letters, "Shows a frequency histogram of the number of letters in the input", "letters")
-	addCommand(Match, "Attempts to expand '\\*' and '?' wildcards to find a single-word match", "match")
-	addCommand(Morse, "Attempts to split a morse code input to spell a single word", "morse")
-	addCommand(OffByOne, "Finds all words that are one character different from the input", "obo", "offbyone", "ob1")
-	addCommand(Shift, "Shows the result of the 25 possible caesar shifts", "shift", "caesar")
-	addCommand(T9, "Attempts to treat a series of numbers as T9 input to spell a single word", "t9")
-	addCommand(Transpose, "Transposes columns to rows and rows to columns", "transpose")
-	addCommand(WordSearch, "Searches for words in the given text grid", "wordsearch")
-	addCommand(Help, "Shows this help text", "help")
+var textCommands = map[string]TextCommand{}
+var help []HelpInfo
+
+func addTextCommand(c TextCommand, helpText string, names ...string) {
+	for i := range names {
+		textCommands[names[i]] = c
+	}
+
+	help = append(help, HelpInfo{
+		Triggers: names,
+		Message:  helpText,
+	})
 }
 
 func Anagram(input string, reply Replier) {
@@ -58,6 +40,10 @@ func Anagram(input string, reply Replier) {
 	}
 }
 
+func init() {
+	addTextCommand(Anagram, "Attempts to find single-word anagrams, expanding '\\*' and '?' wildcards", "anagram")
+}
+
 func Analysis(input string, reply Replier) {
 	input = strings.ToLower(input)
 	res := kowalski.Analyse(checkers[0], input)
@@ -65,6 +51,10 @@ func Analysis(input string, reply Replier) {
 		reply("Analysis: nothing interesting found")
 	}
 	reply("Analysis:\n\t%s", strings.Join(res, "\n\t"))
+}
+
+func init() {
+	addTextCommand(Analysis, "Analyses text and provides a summary of potentially interesting findings", "analysis", "analyze", "analyse")
 }
 
 func Chunk(input string, reply Replier) {
@@ -87,8 +77,8 @@ func Chunk(input string, reply Replier) {
 	reply("Chunked: %s", strings.Join(kowalski.Chunk(text, parts...), " "))
 }
 
-func Help(_ string, reply Replier) {
-	reply("Help:%s", helpText.String())
+func init() {
+	addTextCommand(Chunk, "Splits the text into chunks of a given size", "chunk")
 }
 
 func Letters(input string, reply Replier) {
@@ -117,6 +107,10 @@ func Letters(input string, reply Replier) {
 	reply(message.String())
 }
 
+func init() {
+	addTextCommand(Letters, "Shows a frequency histogram of the number of letters in the input", "letters")
+}
+
 func Match(input string, reply Replier) {
 	input = strings.ToLower(input)
 	if isValidWord(input) {
@@ -127,9 +121,17 @@ func Match(input string, reply Replier) {
 	}
 }
 
+func init() {
+	addTextCommand(Match, "Attempts to expand '\\*' and '?' wildcards to find a single-word match", "match")
+}
+
 func Morse(input string, reply Replier) {
 	res := merge(kowalski.MultiplexFromMorse(checkers, input, kowalski.Dedupe))
 	reply("Matches for %s: %v", input, res)
+}
+
+func init() {
+	addTextCommand(Morse, "Attempts to split a morse code input to spell a single word", "morse")
 }
 
 func OffByOne(input string, reply Replier) {
@@ -140,6 +142,10 @@ func OffByOne(input string, reply Replier) {
 	} else {
 		reply("Invalid word: %s", input)
 	}
+}
+
+func init() {
+	addTextCommand(OffByOne, "Finds all words that are one character different from the input", "obo", "offbyone", "ob1")
 }
 
 func Shift(input string, reply Replier) {
@@ -156,6 +162,10 @@ func Shift(input string, reply Replier) {
 	reply(out.String())
 }
 
+func init() {
+	addTextCommand(Shift, "Shows the result of the 25 possible caesar shifts", "shift", "caesar")
+}
+
 func T9(input string, reply Replier) {
 	if isValidT9(input) {
 		res := merge(kowalski.MultiplexFromT9(checkers, input, kowalski.Dedupe))
@@ -165,8 +175,16 @@ func T9(input string, reply Replier) {
 	}
 }
 
+func init() {
+	addTextCommand(T9, "Attempts to treat a series of numbers as T9 input to spell a single word", "t9")
+}
+
 func Transpose(input string, reply Replier) {
 	reply("Transposed:\n\n%s", strings.Join(kowalski.Transpose(strings.Split(input, "\n")), "\n"))
+}
+
+func init() {
+	addTextCommand(Transpose, "Transposes columns to rows and rows to columns", "transpose")
 }
 
 func WordSearch(input string, reply Replier) {
@@ -177,4 +195,32 @@ func WordSearch(input string, reply Replier) {
 		strings.Join(countReps(res[0]), ", "),
 		strings.Join(countReps(subtract(res[1], res[0])), ", "),
 	)
+}
+
+func init() {
+	addTextCommand(WordSearch, "Searches for words in the given text grid", "wordsearch")
+}
+
+func Help(_ string, reply Replier) {
+	helpText := strings.Builder{}
+	for i := range help {
+		helpText.WriteString(fmt.Sprintf("\n\t**%s%s**", *prefix, help[i].Triggers[0]))
+		helpText.WriteString(fmt.Sprintf(" _%s_", help[i].Message))
+		if len(help[i].Triggers) > 1 {
+			helpText.WriteString(" [Aliases: ")
+			for j := range help[i].Triggers[1:] {
+				if j > 0 {
+					helpText.WriteString(", ")
+				}
+				helpText.WriteString(fmt.Sprintf("%s%s", *prefix, help[i].Triggers[1+j]))
+			}
+			helpText.WriteString("]")
+		}
+	}
+
+	reply("Help:%s", helpText.String())
+}
+
+func init() {
+	addTextCommand(Help, "Shows this help text", "help")
 }

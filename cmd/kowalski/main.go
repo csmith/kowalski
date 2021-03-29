@@ -76,12 +76,12 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	line := m.Content
 
-	for k := range commands {
+	for k := range textCommands {
 		if pfx := fmt.Sprintf("%s%s", *prefix, k); strings.HasPrefix(line, pfx) {
 			remaining := strings.TrimPrefix(line, pfx)
 			runes := []rune(remaining)
 			if len(runes) == 0 || unicode.IsSpace(runes[0]) {
-				commands[k](strings.TrimSpace(remaining), func(format string, a ...interface{}) {
+				textCommands[k](strings.TrimSpace(remaining), func(format string, a ...interface{}) {
 					sendMessage(s, m, fmt.Sprintf(format, a...))
 				})
 			}
