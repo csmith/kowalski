@@ -9,7 +9,6 @@ import (
 	"sort"
 	"strings"
 	"syscall"
-	"unicode"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/csmith/kowalski/v3"
@@ -75,18 +74,44 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	line := m.Content
+	command, arguments, ok := parseCommand(line)
+	if !ok {
+		return
+	}
 
-	for k := range textCommands {
-		if pfx := fmt.Sprintf("%s%s", *prefix, k); strings.HasPrefix(line, pfx) {
-			remaining := strings.TrimPrefix(line, pfx)
-			runes := []rune(remaining)
-			if len(runes) == 0 || unicode.IsSpace(runes[0]) {
-				textCommands[k](strings.TrimSpace(remaining), func(format string, a ...interface{}) {
-					sendMessage(s, m, fmt.Sprintf(format, a...))
-				})
-			}
+	if c, ok := textCommands[command]; ok {
+		c(arguments, func(format string, a ...interface{}) {
+			sendMessage(s, m, fmt.Sprintf(format, a...))
+		})
+	}
+
+	if c, ok := fileCommands[command]; ok {
+		var urls []string
+		for i := range m.Attachments {
+			urls = append(urls, m.Attachments[i].URL)
+		}
+
+		if len(urls) > 0 {
+			c(arguments, urls, func(format string, a ...interface{}) {
+				sendMessage(s, m, fmt.Sprintf(format, a...))
+			})
 		}
 	}
+}
+
+func parseCommand(input string) (command, arguments string, ok bool) {
+	parts := strings.SplitN(input, " ", 2)
+	command = strings.ToLower(parts[0])
+	if !strings.HasPrefix(command, *prefix) {
+		return
+	}
+
+	command = strings.TrimPrefix(command, *prefix)
+	if len(parts) > 1 {
+		arguments = parts[1]
+	}
+	ok = true
+	return
 }
 
 func subtract(input, exclusions []string) []string {

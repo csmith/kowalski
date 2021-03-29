@@ -10,6 +10,7 @@ import (
 
 type Replier func(format string, a ...interface{})
 type TextCommand func(input string, reply Replier)
+type FileCommand func(input string, urls []string, reply Replier)
 
 type HelpInfo struct {
 	Triggers []string
@@ -17,11 +18,23 @@ type HelpInfo struct {
 }
 
 var textCommands = map[string]TextCommand{}
+var fileCommands = map[string]FileCommand{}
 var help []HelpInfo
 
 func addTextCommand(c TextCommand, helpText string, names ...string) {
 	for i := range names {
 		textCommands[names[i]] = c
+	}
+
+	help = append(help, HelpInfo{
+		Triggers: names,
+		Message:  helpText,
+	})
+}
+
+func addFileCommand(c FileCommand, helpText string, names ...string) {
+	for i := range names {
+		fileCommands[names[i]] = c
 	}
 
 	help = append(help, HelpInfo{
