@@ -24,10 +24,24 @@ func MultiplexMatch(ctx context.Context, checkers []*SpellChecker, pattern strin
 	}, opts)
 }
 
+// MultiplexMultiMatch performs the MultiMatch operation over a number of different checkers.
+func MultiplexMultiMatch(ctx context.Context, checkers []*SpellChecker, pattern string, opts ... MultiplexOption) ([][]string, error) {
+	return multiplexWithErrors(checkers, func(checker *SpellChecker) ([]string, error) {
+		return MultiMatch(ctx, checker, pattern)
+	}, opts)
+}
+
 // MultiplexAnagram performs the Anagram operation over a number of different checkers.
 func MultiplexAnagram(ctx context.Context, checkers []*SpellChecker, pattern string, opts ... MultiplexOption) ([][]string, error) {
 	return multiplexWithErrors(checkers, func(checker *SpellChecker) ([]string, error) {
 		return Anagram(ctx, checker, pattern)
+	}, opts)
+}
+
+// MultiplexMultiAnagram performs the MultiAnagram operation over a number of different checkers.
+func MultiplexMultiAnagram(ctx context.Context, checkers []*SpellChecker, pattern string, opts ... MultiplexOption) ([][]string, error) {
+	return multiplexWithErrors(checkers, func(checker *SpellChecker) ([]string, error) {
+		return MultiAnagram(ctx, checker, pattern)
 	}, opts)
 }
 

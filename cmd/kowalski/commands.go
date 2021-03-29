@@ -194,7 +194,7 @@ func Match(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(Match, "Attempts to expand '\\*' and '?' wildcards to find a single-word match", "match")
+	addTextCommand(Match, "Attempts to expand '?' wildcards to find a single-word match", "match")
 }
 
 func Morse(input string, r Replier) {
@@ -204,6 +204,48 @@ func Morse(input string, r Replier) {
 
 func init() {
 	addTextCommand(Morse, "Attempts to split a morse code input to spell a single word", "morse")
+}
+
+func MultiAnagram(input string, r Replier) {
+	input = strings.ToLower(input)
+	if isValidWord(input) {
+		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		defer cancel()
+
+		words, err := kowalski.MultiplexMultiAnagram(ctx, checkers, input, kowalski.Dedupe)
+		if err != nil {
+			r.reply("Error: %v", err)
+		} else {
+			r.reply("Multi anagrams for %s: %v", input, strings.Join(merge(words), ", "))
+		}
+	} else {
+		r.reply("Invalid word: %s", input)
+	}
+}
+
+func init() {
+	addTextCommand(MultiAnagram, "Attempts to find multi-word anagrams, expanding '?' wildcards", "multigram", "multianagram")
+}
+
+func MultiMatch(input string, r Replier) {
+	input = strings.ToLower(input)
+	if isValidWord(input) {
+		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		defer cancel()
+
+		words, err := kowalski.MultiplexMultiMatch(ctx, checkers, input, kowalski.Dedupe)
+		if err != nil {
+			r.reply("Error: %v", err)
+		} else {
+			r.reply("Multi matches for %s: %s", input, strings.Join(merge(words), ", "))
+		}
+	} else {
+		r.reply("Invalid word: %s", input)
+	}
+}
+
+func init() {
+	addTextCommand(MultiMatch, "Attempts to expand '?' wildcards to find multi-word matches", "multimatch")
 }
 
 func OffByOne(input string, r Replier) {

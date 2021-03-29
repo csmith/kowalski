@@ -33,6 +33,38 @@ func TestAnagrams(t *testing.T) {
 	}
 }
 
+func TestMultiAnagrams(t *testing.T) {
+	tests := []struct {
+		name  string
+		query string
+		want  []string
+	}{
+		// All the normal behaviour should work
+		{"exact match", "foo", []string{"foo"}},
+		{"anagram match", "oof", []string{"foo"}},
+		{"exact match with one wildcard", "fo?", []string{"foo"}},
+		{"anagram match with one wildcard", "oo?", []string{"foo"}},
+		{"exact match with two wildcards", "f??", []string{"foo"}},
+		{"anagram match with two wildcards", "?f?", []string{"foo"}},
+		{"exact match with all wildcards", "????", []string{"quux"}},
+		{"multiple exact matches with one wildcard", "ba?", []string{"bar", "baz"}},
+		{"multiple anagram matches with one wildcard", "b?a", []string{"bar", "baz"}},
+		{"multiple exact matches with all wildcards", "???", []string{"bar", "baz", "foo"}},
+		// And new multi-word behaviour should too
+		{"two words", "bfaozo", []string{"baz foo"}},
+		{"two words with wildcards", "bfao?o", []string{"bar foo", "baz foo"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, _ := MultiAnagram(context.Background(), testChecker, tt.query); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Anagram() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+
 func TestPermute(t *testing.T) {
 	tests := []struct {
 		name       string

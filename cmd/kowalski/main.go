@@ -180,15 +180,6 @@ func countReps(input []string) []string {
 	return res
 }
 
-func sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string) {
-	if len(text) > 2000 {
-		text = fmt.Sprintf("%s <truncated>", text[0:1988])
-	}
-	if _, err := s.ChannelMessageSend(m.ChannelID, text); err != nil {
-		log.Printf("Failed to send message: %v\n", err)
-	}
-}
-
 func isValidWord(word string) bool {
 	if len(word) == 0 {
 		return false
@@ -225,8 +216,13 @@ func (d *DiscordReplier) reply(format string, a ...interface{}) {
 }
 
 func (d *DiscordReplier) replyWithFiles(files []*discordgo.File, format string, a ...interface{}) {
+	text := fmt.Sprintf(format, a...)
+	if len(text) > 2000 {
+		text = fmt.Sprintf("%s <truncated>", text[0:1988])
+	}
+
 	_, err := d.session.ChannelMessageSendComplex(d.channelId, &discordgo.MessageSend{
-		Content: fmt.Sprintf(format, a...),
+		Content: text,
 		Files:   files,
 	})
 	if err != nil {
