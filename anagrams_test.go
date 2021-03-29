@@ -1,6 +1,7 @@
 package kowalski
 
 import (
+	"context"
 	"reflect"
 	"testing"
 )
@@ -25,7 +26,7 @@ func TestAnagrams(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Anagram(testChecker, tt.query); !reflect.DeepEqual(got, tt.want) {
+			if got, _ := Anagram(context.Background(), testChecker, tt.query); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Anagram() = %v, want %v", got, tt.want)
 			}
 		})

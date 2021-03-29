@@ -1,23 +1,28 @@
 package kowalski
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
 )
 
 // Match returns all valid words that match the given pattern, expanding '?' as a single character wildcard
-func Match(checker *SpellChecker, pattern string) []string {
-	res, _ := findMatch(checker, strings.ToLower(pattern))
-	return res
+func Match(ctx context.Context, checker *SpellChecker, pattern string) ([]string, error) {
+	res, _, err := findMatch(ctx, checker, strings.ToLower(pattern))
+	return res, err
 }
 
 // OffByOne returns all words that can be made by performing one character change on the input. The input is
 // assumed to be a single, lowercase word containing a-z chars only.
-func OffByOne(checker *SpellChecker, input string) []string {
+func OffByOne(ctx context.Context, checker *SpellChecker, input string) ([]string, error) {
 	words := map[string]bool{}
 	for i := range input {
-		res := Match(checker, fmt.Sprintf("%s?%s", input[0:i], input[i+1:]))
+		res, err := Match(ctx, checker, fmt.Sprintf("%s?%s", input[0:i], input[i+1:]))
+		if err != nil {
+			return nil, err
+		}
+
 		for j := range res {
 			words[res[j]] = true
 		}
@@ -29,16 +34,20 @@ func OffByOne(checker *SpellChecker, input string) []string {
 			res = append(res, w)
 		}
 	}
-	return res
+	return res, nil
 }
 
 // findMatch returns all valid words that match the given pattern, expanding '?' as a single character wildcard.
 // It will aggressively skip sequences that don't form valid prefixes; the maximum valid prefix length is returned as
 // the second parameter (for cases where matches are returned, this will equal len(word)).
-func findMatch(checker *SpellChecker, word string) ([]string, int) {
+func findMatch(ctx context.Context, checker *SpellChecker, word string) ([]string, int, error) {
 	maxLength := 0
 	stems := []string{""}
 	for offset := 0; offset < len(word) && len(stems) > 0; offset++ {
+		if ctx.Err() != nil {
+			return nil, 0, ctx.Err()
+		}
+
 		newStems := make([]string, 0, len(stems))
 
 		var chars []uint8
@@ -67,5 +76,5 @@ func findMatch(checker *SpellChecker, word string) ([]string, int) {
 		}
 	}
 	sort.Strings(res)
-	return res, maxLength
+	return res, maxLength, nil
 }

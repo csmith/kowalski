@@ -32,7 +32,7 @@ of the number of words it will find:
 package example
 
 import (
-    "github.com/csmith/kowalski/v3"
+    "github.com/csmith/kowalski/v4"
     "os"
 )
 
@@ -52,7 +52,7 @@ models are available in the [models](models) directory. To load a model:
 package example
 
 import (
-    "github.com/csmith/kowalski/v3"
+    "github.com/csmith/kowalski/v4"
     "os"
 )
 

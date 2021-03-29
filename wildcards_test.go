@@ -1,6 +1,7 @@
 package kowalski
 
 import (
+	"context"
 	"reflect"
 	"testing"
 )
@@ -22,7 +23,7 @@ func TestMatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Match(testChecker, tt.query); !reflect.DeepEqual(got, tt.want) {
+			if got, _ := Match(context.Background(), testChecker, tt.query); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Match() = %v, want %v", got, tt.want)
 			}
 		})

@@ -1,12 +1,13 @@
 package kowalski
 
 import (
+	"context"
 	"sort"
 	"strings"
 )
 
 // Anagram finds all anagrams of the given word, expanding '?' as a single wildcard character
-func Anagram(checker *SpellChecker, word string) []string {
+func Anagram(ctx context.Context, checker *SpellChecker, word string) ([]string, error) {
 	var (
 		res        []string
 		swapBefore = len(word)
@@ -19,7 +20,11 @@ func Anagram(checker *SpellChecker, word string) []string {
 	}(word)
 
 	for w := []byte(sortedWord); w != nil; w = permute(w, swapBefore+1) {
-		matches, count := findMatch(checker, string(w))
+		matches, count, err := findMatch(ctx, checker, string(w))
+		if err != nil {
+			return nil, err
+		}
+
 		if len(matches) > 0 {
 			res = append(res, matches...)
 			swapBefore = len(word)
@@ -29,7 +34,7 @@ func Anagram(checker *SpellChecker, word string) []string {
 	}
 
 	sort.Strings(res)
-	return unique(res)
+	return unique(res), nil
 }
 
 // permute returns the next permutation of the given input, in lexicographical order.

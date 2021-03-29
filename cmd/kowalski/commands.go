@@ -1,13 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/csmith/kowalski/v3"
+	"github.com/csmith/kowalski/v4"
 )
 
 type Replier interface {
@@ -52,8 +54,15 @@ func addFileCommand(c FileCommand, helpText string, names ...string) {
 func Anagram(input string, r Replier) {
 	input = strings.ToLower(input)
 	if isValidWord(input) {
-		res := merge(kowalski.MultiplexAnagram(checkers, input, kowalski.Dedupe))
-		r.reply("Anagrams for %s: %v", input, res)
+		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		defer cancel()
+
+		words, err := kowalski.MultiplexAnagram(ctx, checkers, input, kowalski.Dedupe)
+		if err != nil {
+			r.reply("Error: %v", err)
+		} else {
+			r.reply("Anagrams for %s: %v", input, merge(words))
+		}
 	} else {
 		r.reply("Invalid word: %s", input)
 	}
@@ -170,8 +179,15 @@ func init() {
 func Match(input string, r Replier) {
 	input = strings.ToLower(input)
 	if isValidWord(input) {
-		res := merge(kowalski.MultiplexMatch(checkers, input, kowalski.Dedupe))
-		r.reply("Matches for %s: %v", input, res)
+		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		defer cancel()
+
+		words, err := kowalski.MultiplexMatch(ctx, checkers, input, kowalski.Dedupe)
+		if err != nil {
+			r.reply("Error: %v", err)
+		} else {
+			r.reply("Matches for %s: %v", input, merge(words))
+		}
 	} else {
 		r.reply("Invalid word: %s", input)
 	}
@@ -193,8 +209,15 @@ func init() {
 func OffByOne(input string, r Replier) {
 	input = strings.ToLower(input)
 	if isValidWord(input) {
-		res := merge(kowalski.MultiplexOffByOne(checkers, input, kowalski.Dedupe))
-		r.reply("Off-by-ones for %s: %v", input, res)
+		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		defer cancel()
+
+		words, err := kowalski.MultiplexOffByOne(ctx, checkers, input, kowalski.Dedupe)
+		if err != nil {
+			r.reply("Error: %v", err)
+		} else {
+			r.reply("Off-by-ones for %s: %v", input, merge(words))
+		}
 	} else {
 		r.reply("Invalid word: %s", input)
 	}

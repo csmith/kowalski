@@ -1,4 +1,4 @@
-module github.com/csmith/kowalski/v3
+module github.com/csmith/kowalski/v4
 
 go 1.16
 

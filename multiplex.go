@@ -1,6 +1,7 @@
 package kowalski
 
 import (
+	"context"
 	"sync"
 )
 
@@ -17,16 +18,16 @@ func Dedupe(options *multiplexOptions) {
 }
 
 // MultiplexMatch performs the Match operation over a number of different checkers.
-func MultiplexMatch(checkers []*SpellChecker, pattern string, opts ... MultiplexOption) [][]string {
-	return multiplex(checkers, func(checker *SpellChecker) []string {
-		return Match(checker, pattern)
+func MultiplexMatch(ctx context.Context, checkers []*SpellChecker, pattern string, opts ... MultiplexOption) ([][]string, error) {
+	return multiplexWithErrors(checkers, func(checker *SpellChecker) ([]string, error) {
+		return Match(ctx, checker, pattern)
 	}, opts)
 }
 
 // MultiplexAnagram performs the Anagram operation over a number of different checkers.
-func MultiplexAnagram(checkers []*SpellChecker, pattern string, opts ... MultiplexOption) [][]string {
-	return multiplex(checkers, func(checker *SpellChecker) []string {
-		return Anagram(checker, pattern)
+func MultiplexAnagram(ctx context.Context, checkers []*SpellChecker, pattern string, opts ... MultiplexOption) ([][]string, error) {
+	return multiplexWithErrors(checkers, func(checker *SpellChecker) ([]string, error) {
+		return Anagram(ctx, checker, pattern)
 	}, opts)
 }
 
@@ -45,9 +46,9 @@ func MultiplexFromMorse(checkers []*SpellChecker, pattern string, opts ... Multi
 }
 
 // MultiplexOffByOne performs the OffByOne operation over a number of different checkers.
-func MultiplexOffByOne(checkers []*SpellChecker, pattern string, opts ... MultiplexOption) [][]string {
-	return multiplex(checkers, func(checker *SpellChecker) []string {
-		return OffByOne(checker, pattern)
+func MultiplexOffByOne(ctx context.Context, checkers []*SpellChecker, pattern string, opts ... MultiplexOption) ([][]string, error) {
+	return multiplexWithErrors(checkers, func(checker *SpellChecker) ([]string, error) {
+		return OffByOne(ctx, checker, pattern)
 	}, opts)
 }
 
@@ -88,6 +89,38 @@ func multiplex(checkers []*SpellChecker, f func(checker *SpellChecker)[]string, 
 		return dedupe(res)
 	}
 	return res
+}
+
+func multiplexWithErrors(checkers []*SpellChecker, f func(checker *SpellChecker)([]string, error), opts []MultiplexOption) ([][]string, error) {
+	o := &multiplexOptions{}
+	for i := range opts {
+		opts[i](o)
+	}
+
+	res := make([][]string, len(checkers))
+	errs := make([]error, len(checkers))
+	wg := &sync.WaitGroup{}
+
+	for i := range checkers {
+		wg.Add(1)
+		go func(i int) {
+			res[i], errs[i] = f(checkers[i])
+			wg.Done()
+		}(i)
+	}
+
+	wg.Wait()
+
+	for i := range errs {
+		if errs[i] != nil {
+			return nil, errs[i]
+		}
+	}
+
+	if o.dedupe {
+		return dedupe(res), nil
+	}
+	return res, nil
 }
 
 func dedupe(data [][]string) [][]string {

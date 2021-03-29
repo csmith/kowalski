@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/csmith/kowalski/v3/data"
+	"github.com/csmith/kowalski/v4/data"
 )
 
 var nonLetterRegex = regexp.MustCompile("[^a-z]+")

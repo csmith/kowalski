@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/csmith/kowalski/v3"
+	"github.com/csmith/kowalski/v4"
 )
 
 var (
@@ -230,6 +230,6 @@ func (d *DiscordReplier) replyWithFiles(files []*discordgo.File, format string, 
 		Files:   files,
 	})
 	if err != nil {
-		log.Printf("Unable to send message: %w", err)
+		log.Printf("Unable to send message: %v", err)
 	}
 }
