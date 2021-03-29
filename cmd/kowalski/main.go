@@ -91,6 +91,10 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 			urls = append(urls, m.Attachments[i].URL)
 		}
 
+		for i := range m.Embeds {
+			urls = append(urls, m.Embeds[i].URL)
+		}
+
 		if len(urls) > 0 {
 			c(arguments, urls, func(format string, a ...interface{}) {
 				sendMessage(s, m, fmt.Sprintf(format, a...))

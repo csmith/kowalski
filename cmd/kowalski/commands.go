@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -92,6 +93,43 @@ func Chunk(input string, reply Replier) {
 
 func init() {
 	addTextCommand(Chunk, "Splits the text into chunks of a given size", "chunk")
+}
+
+func Colours(_ string, urls []string, reply Replier) {
+	res, err := http.Get(urls[0])
+	if err != nil {
+		reply("Unable to download image: %v", err)
+		return
+	}
+
+	defer res.Body.Close()
+	colours, err := kowalski.ExtractColours(res.Body)
+	if err != nil {
+		reply("Unable to decode image: %v", err)
+		return
+	}
+
+	text := strings.Builder{}
+	text.WriteString(fmt.Sprintf("%d colours found:\n```\nHex         R   G   B   A Pixels\n", len(colours)))
+	for i := range colours {
+		if i >= 25 {
+			text.WriteString("... truncated ...\n")
+			break
+		}
+
+		r, g, b, a := colours[i].Colour.RGBA()
+		if a == 65535 {
+			text.WriteString(fmt.Sprintf("#%02x%02x%02x   %3[1]d %3[2]d %3[3]d   - %d\n", r/257, g/257, b/257, colours[i].Count))
+		} else {
+			text.WriteString(fmt.Sprintf("#%02x%02x%02x#%02x %3[1]d %3[2]d %3[3]d %3[4]d %d\n", r/257, g/257, b/257, a/257, colours[i].Count))
+		}
+	}
+	text.WriteString("```")
+	reply(text.String())
+}
+
+func init() {
+	addFileCommand(Colours, "Counts the colours within the image", "colours", "colors")
 }
 
 func Letters(input string, reply Replier) {
