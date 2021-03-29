@@ -79,10 +79,13 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	replier := &DiscordReplier{
+		session:   s,
+		channelId: m.ChannelID,
+	}
+
 	if c, ok := textCommands[command]; ok {
-		c(arguments, func(format string, a ...interface{}) {
-			sendMessage(s, m, fmt.Sprintf(format, a...))
-		})
+		c(arguments, replier)
 	}
 
 	if c, ok := fileCommands[command]; ok {
@@ -96,9 +99,7 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		if len(urls) > 0 {
-			c(arguments, urls, func(format string, a ...interface{}) {
-				sendMessage(s, m, fmt.Sprintf(format, a...))
-			})
+			c(arguments, urls, replier)
 		}
 	}
 }
@@ -212,4 +213,23 @@ func isValidT9(word string) bool {
 		}
 	}
 	return true
+}
+
+type DiscordReplier struct {
+	session   *discordgo.Session
+	channelId string
+}
+
+func (d *DiscordReplier) reply(format string, a ...interface{}) {
+	d.replyWithFiles(nil, format, a...)
+}
+
+func (d *DiscordReplier) replyWithFiles(files []*discordgo.File, format string, a ...interface{}) {
+	_, err := d.session.ChannelMessageSendComplex(d.channelId, &discordgo.MessageSend{
+		Content: fmt.Sprintf(format, a...),
+		Files:   files,
+	})
+	if err != nil {
+		log.Printf("Unable to send message: %w", err)
+	}
 }
