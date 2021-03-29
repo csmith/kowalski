@@ -82,6 +82,7 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	replier := &DiscordReplier{
 		session:   s,
 		channelId: m.ChannelID,
+		reference: m.Message.Reference(),
 	}
 
 	if c, ok := textCommands[command]; ok {
@@ -208,6 +209,7 @@ func isValidT9(word string) bool {
 
 type DiscordReplier struct {
 	session   *discordgo.Session
+	reference *discordgo.MessageReference
 	channelId string
 }
 
@@ -222,8 +224,9 @@ func (d *DiscordReplier) replyWithFiles(files []*discordgo.File, format string, 
 	}
 
 	_, err := d.session.ChannelMessageSendComplex(d.channelId, &discordgo.MessageSend{
-		Content: text,
-		Files:   files,
+		Content:   text,
+		Files:     files,
+		Reference: d.reference,
 	})
 	if err != nil {
 		log.Printf("Unable to send message: %v", err)
