@@ -128,6 +128,22 @@ func analyseDistribution(_ *SpellChecker, input string) []string {
 		results = append(results, message.String())
 	}
 
+	if present < 10 && present < len(input) {
+		chars := strings.Builder{}
+		for i := range dists {
+			if dists[i] > 0 {
+				chars.WriteByte(byte('A' + i))
+			}
+		}
+
+		results = append(results, fmt.Sprintf("Contains only some letters: %s", chars.String()))
+		if chars.String() == "ADFGX" {
+			results = append(results, "Might be an ADFGX cipher?")
+		} else if chars.String() == "ADFGVX" {
+			results = append(results, "Might be an ADFGVX cipher?")
+		}
+	}
+
 	return results
 }
 
