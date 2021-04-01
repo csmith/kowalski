@@ -11,8 +11,9 @@ import (
 
 var nonLetterRegex = regexp.MustCompile("[^a-z]+")
 
-// Analyse performs various forms of text analysis on the input and returns findings.
-func Analyse(checker *SpellChecker, input string) []string {
+type analyser func(checker *SpellChecker, input string) []string
+
+func analyseEntropy(_ *SpellChecker, input string) []string {
 	var results []string
 
 	entropy := shannonEntropy(input)
@@ -23,6 +24,12 @@ func Analyse(checker *SpellChecker, input string) []string {
 	} else if entropy >= 7.5 {
 		results = append(results, fmt.Sprintf("Shannon entropy is %.2f - very high, likely encrypted/compressed", entropy))
 	}
+
+	return results
+}
+
+func analyseDataReferences(_ *SpellChecker, input string) []string {
+	var results []string
 
 	cleaned := nonLetterRegex.ReplaceAllString(strings.ToLower(input), "")
 	if len(cleaned) > 0 {
@@ -37,6 +44,12 @@ func Analyse(checker *SpellChecker, input string) []string {
 		}
 	}
 
+	return results
+}
+
+func analyseCaesarShifts(checker *SpellChecker, input string) []string {
+	var results []string
+
 	shifts := CaesarShifts(input)
 	bestScore, bestShift := 0.0, 0
 	for i, s := range shifts {
@@ -49,6 +62,12 @@ func Analyse(checker *SpellChecker, input string) []string {
 	if bestScore > 0.5 {
 		results = append(results, fmt.Sprintf("Caesar shift of %d might be English: %s", bestShift, shifts[bestShift]))
 	}
+
+	return results
+}
+
+func analyseAlternateChars(checker *SpellChecker, input string) []string {
+	var results []string
 
 	odds := strings.Builder{}
 	evens := strings.Builder{}
@@ -68,11 +87,24 @@ func Analyse(checker *SpellChecker, input string) []string {
 		results = append(results, fmt.Sprintf("Alternating characters might be English: %s", evens.String()))
 	}
 
+	return results
+}
+
+func analyseLength(_ *SpellChecker, input string) []string {
+	var results []string
+
+	cleaned := nonLetterRegex.ReplaceAllString(strings.ToLower(input), "")
 	if len(input)%8 == 0 {
 		results = append(results, "Multiple of 8 characters - might be encoded binary?")
 	} else if len(cleaned)%8 == 0 {
 		results = append(results, "Multiple of 8 A-Z characters - might be encoded binary?")
 	}
+
+	return results
+}
+
+func analyseDistribution(_ *SpellChecker, input string) []string {
+	var results []string
 
 	dists := LetterDistribution(input)
 	present := 0
@@ -94,6 +126,26 @@ func Analyse(checker *SpellChecker, input string) []string {
 			}
 		}
 		results = append(results, message.String())
+	}
+
+	return results
+}
+
+var analysers = []analyser{
+	analyseEntropy,
+	analyseDataReferences,
+	analyseCaesarShifts,
+	analyseAlternateChars,
+	analyseLength,
+	analyseDistribution,
+}
+
+// Analyse performs various forms of text analysis on the input and returns findings.
+func Analyse(checker *SpellChecker, input string) []string {
+	var results []string
+
+	for i := range analysers {
+		results = append(results, analysers[i](checker, input)...)
 	}
 
 	return results
