@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/csmith/kowalski/v4/data"
@@ -128,7 +129,7 @@ func analyseDistribution(_ *SpellChecker, input string) []string {
 		results = append(results, message.String())
 	}
 
-	if present < 10 && present < len(input) {
+	if present > 0 && present < 10 && present < len(input) {
 		chars := strings.Builder{}
 		for i := range dists {
 			if dists[i] > 0 {
@@ -147,6 +148,33 @@ func analyseDistribution(_ *SpellChecker, input string) []string {
 	return results
 }
 
+var rleRegex = regexp.MustCompile(`^(\d+\D)+$`)
+
+func analyseRunLengthEncoding(_ *SpellChecker, input string) []string {
+	var results []string
+
+	if rleRegex.MatchString(input) {
+		message := strings.Builder{}
+		message.WriteString("Might be run-length encoded: ")
+		num := 0
+		for i := range input {
+			if d, err := strconv.Atoi(string(input[i])); err == nil {
+				num = 10 * num + d
+			} else {
+				message.WriteString(strings.Repeat(string(input[i]), num))
+				num = 0
+			}
+		}
+		if message.Len() > 250 {
+			results = append(results, fmt.Sprintf("%s...", message.String()[0:247]))
+		} else {
+			results = append(results, message.String())
+		}
+	}
+
+	return results
+}
+
 var analysers = []analyser{
 	analyseEntropy,
 	analyseDataReferences,
@@ -154,6 +182,7 @@ var analysers = []analyser{
 	analyseAlternateChars,
 	analyseLength,
 	analyseDistribution,
+	analyseRunLengthEncoding,
 }
 
 // Analyse performs various forms of text analysis on the input and returns findings.
