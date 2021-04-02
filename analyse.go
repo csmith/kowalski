@@ -57,11 +57,11 @@ func analyseCaesarShifts(checker *SpellChecker, input string) []string {
 		score := Score(checker, s)
 		if score > bestScore {
 			bestScore = score
-			bestShift = i + 1
+			bestShift = i
 		}
 	}
 	if bestScore > 0.5 {
-		results = append(results, fmt.Sprintf("Caesar shift of %d might be English: %s", bestShift, shifts[bestShift]))
+		results = append(results, fmt.Sprintf("Caesar shift of %d might be English: %s", bestShift + 1, shifts[bestShift]))
 	}
 
 	return results
