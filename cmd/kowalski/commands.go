@@ -54,7 +54,7 @@ func addFileCommand(c FileCommand, helpText string, names ...string) {
 func Anagram(input string, r Replier) {
 	input = strings.ToLower(input)
 	if isValidWord(input) {
-		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		words, err := kowalski.MultiplexAnagram(ctx, checkers, input, kowalski.Dedupe)
@@ -146,6 +146,33 @@ func init() {
 	addFileCommand(Colours, "Counts the colours within the image", "colours", "colors")
 }
 
+func HiddenPixels(_ string, urls []string, r Replier) {
+	res, err := http.Get(urls[0])
+	if err != nil {
+		r.reply("Unable to download image: %v", err)
+		return
+	}
+
+	defer res.Body.Close()
+	output, err := kowalski.HiddenPixels(res.Body)
+	if err != nil {
+		r.reply("Unable to decode image: %v", err)
+		return
+	}
+
+	r.replyWithFiles([]*discordgo.File{
+		{
+			Name:        "output.png",
+			ContentType: "image/png",
+			Reader:      output,
+		},
+	}, "")
+}
+
+func init() {
+	addFileCommand(HiddenPixels, "Finds hidden pixels in images", "hidden", "hiddenpixels")
+}
+
 func Letters(input string, r Replier) {
 	res := kowalski.LetterDistribution(input)
 	max := 0
@@ -179,7 +206,7 @@ func init() {
 func Match(input string, r Replier) {
 	input = strings.ToLower(input)
 	if isValidWord(input) {
-		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		words, err := kowalski.MultiplexMatch(ctx, checkers, input, kowalski.Dedupe)
@@ -209,7 +236,7 @@ func init() {
 func MultiAnagram(input string, r Replier) {
 	input = strings.ToLower(input)
 	if isValidWord(input) {
-		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		words, err := kowalski.MultiplexMultiAnagram(ctx, checkers, input, kowalski.Dedupe)
@@ -230,7 +257,7 @@ func init() {
 func MultiMatch(input string, r Replier) {
 	input = strings.ToLower(input)
 	if isValidWord(input) {
-		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		words, err := kowalski.MultiplexMultiMatch(ctx, checkers, input, kowalski.Dedupe)
@@ -251,7 +278,7 @@ func init() {
 func OffByOne(input string, r Replier) {
 	input = strings.ToLower(input)
 	if isValidWord(input) {
-		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		words, err := kowalski.MultiplexOffByOne(ctx, checkers, input, kowalski.Dedupe)
