@@ -99,6 +99,10 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 			urls = append(urls, m.Embeds[i].URL)
 		}
 
+		if len(urls) == 0 && (strings.HasPrefix("http://", arguments) || strings.HasPrefix("https://", arguments)) {
+			urls = append(urls, arguments)
+		}
+
 		if len(urls) > 0 {
 			c(arguments, urls, replier)
 		}
