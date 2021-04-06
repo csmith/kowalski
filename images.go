@@ -69,7 +69,7 @@ func SplitRGB(reader io.Reader) (r, g, b io.Reader, err error) {
 
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			cr, cb, cg, ca := im.At(x, y).RGBA()
+			cr, cg, cb, ca := im.At(x, y).RGBA()
 			for dx := 0; dx < scale; dx++ {
 				for dy := 0; dy < scale; dy++ {
 					redImage.SetRGBA(x * scale + dx, y * scale + dy, color.RGBA{R: uint8(cr & 0xff), A: uint8(ca & 0xff)})
