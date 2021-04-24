@@ -101,6 +101,9 @@ func analyseLength(_ *SpellChecker, input string) []string {
 		results = append(results, "Multiple of 8 A-Z characters - might be encoded binary?")
 	}
 
+	results = append(results, fmt.Sprintf("%d characters long (total)", len(input)))
+	results = append(results, fmt.Sprintf("%d characters long (a-zA-Z)", len(cleaned)))
+
 	return results
 }
 
