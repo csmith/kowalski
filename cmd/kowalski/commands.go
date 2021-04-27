@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/csmith/kowalski/v4"
+	"github.com/csmith/cryptography"
+	"github.com/csmith/kowalski/v5"
 )
 
 type Replier interface {
@@ -174,7 +175,7 @@ func init() {
 }
 
 func Letters(input string, r Replier) {
-	res := kowalski.LetterDistribution(input)
+	res := cryptography.LetterDistribution([]byte(input))
 	max := 0
 	for i := range res {
 		if res[i] > max {
@@ -334,15 +335,16 @@ func init() {
 }
 
 func Shift(input string, r Replier) {
-	res := kowalski.CaesarShifts(input)
+	res := cryptography.CaesarShifts([]byte(input))
 	out := strings.Builder{}
 	out.WriteString("Caesar shifts:\n")
 	for i, s := range res {
-		score := kowalski.Score(checkers[0], s)
+		score := kowalski.Score(checkers[0], string(s))
+		ioc := cryptography.IndexOfCoincidence(s)
 		if score > 0.5 {
-			s = fmt.Sprintf("**%s**", s)
+			s = []byte(fmt.Sprintf("**%s**", s))
 		}
-		out.WriteString(fmt.Sprintf("\t%2d: %s\n", i+1, s))
+		out.WriteString(fmt.Sprintf("\t%2d: %s (%.5f)\n", i, s, ioc))
 	}
 	r.reply(out.String())
 }

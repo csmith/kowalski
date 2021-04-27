@@ -1,9 +1,10 @@
-module github.com/csmith/kowalski/v4
+module github.com/csmith/kowalski/v5
 
 go 1.16
 
 require (
 	github.com/bwmarrin/discordgo v0.23.2
+	github.com/csmith/cryptography v1.0.0
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/willf/bitset v1.1.11 // indirect

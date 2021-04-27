@@ -7,7 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/csmith/kowalski/v4/data"
+	"github.com/csmith/cryptography"
+	"github.com/csmith/kowalski/v5/data"
 )
 
 var nonLetterRegex = regexp.MustCompile("[^a-z]+")
@@ -17,7 +18,7 @@ type analyser func(checker *SpellChecker, input string) []string
 func analyseEntropy(_ *SpellChecker, input string) []string {
 	var results []string
 
-	entropy := shannonEntropy(input)
+	entropy := cryptography.ShannonEntropy([]byte(input))
 	if entropy <= 0.5 {
 		results = append(results, fmt.Sprintf("Shannon entropy is %.2f - very little variation in input", entropy))
 	} else if entropy >= 3.5 && entropy <= 5 {
@@ -51,10 +52,10 @@ func analyseDataReferences(_ *SpellChecker, input string) []string {
 func analyseCaesarShifts(checker *SpellChecker, input string) []string {
 	var results []string
 
-	shifts := CaesarShifts(input)
+	shifts := cryptography.CaesarShifts([]byte(input))
 	bestScore, bestShift := 0.0, 0
 	for i, s := range shifts {
-		score := Score(checker, s)
+		score := Score(checker, string(s))
 		if score > bestScore {
 			bestScore = score
 			bestShift = i
@@ -110,7 +111,7 @@ func analyseLength(_ *SpellChecker, input string) []string {
 func analyseDistribution(_ *SpellChecker, input string) []string {
 	var results []string
 
-	dists := LetterDistribution(input)
+	dists := cryptography.LetterDistribution([]byte(input))
 	present := 0
 	for i := range dists {
 		if dists[i] > 0 {
@@ -206,7 +207,7 @@ func Score(checker *SpellChecker, input string) float64 {
 	density := float64(len(FindWords(checker, input))) / float64(len(input))
 	densityScore := math.Max(1-math.Abs(density-targetDensity), 0.1)
 
-	entropy := shannonEntropy(input)
+	entropy := cryptography.ShannonEntropy([]byte(input))
 	entropyScore := 1.0
 	if entropy < 3.5 {
 		entropyScore = math.Max(entropy/3.5, 0.1)
@@ -233,24 +234,6 @@ func splitTerms(input string, prefix, terms []string) ([]string, bool) {
 	return nil, false
 }
 
-// shannonEntropy calculates the Shannon Entropy of the input.
-func shannonEntropy(input string) float64 {
-	var occurrences [256]float64
-	for i := range input {
-		occurrences[input[i]]++
-	}
-
-	var size = float64(len(input))
-	var entropy float64 = 0
-	for i := range occurrences {
-		if occurrences[i] > 0 {
-			prob := occurrences[i] / size
-			entropy -= prob * math.Log2(prob)
-		}
-	}
-	return entropy
-}
-
 func sameLength(terms []string) bool {
 	if len(terms) == 0 {
 		return true
@@ -263,18 +246,4 @@ func sameLength(terms []string) bool {
 		}
 	}
 	return true
-}
-
-// LetterDistribution counts the number of the occurrences of each English letter (ignoring case).
-func LetterDistribution(input string) [26]int {
-	var res [26]int
-	for i := range input {
-		if input[i] >= 'a' && input[i] <= 'z' {
-			res[input[i]-'a']++
-		}
-		if input[i] >= 'A' && input[i] <= 'Z' {
-			res[input[i]-'A']++
-		}
-	}
-	return res
 }
