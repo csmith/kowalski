@@ -23,9 +23,11 @@ var (
 	checkers []*kowalski.SpellChecker
 )
 
-func main() {
+func init() {
 	flag.Parse()
+}
 
+func main() {
 	checkers = []*kowalski.SpellChecker{
 		loadModel(*goodModel),
 		loadModel(*backupModel),
