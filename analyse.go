@@ -55,14 +55,16 @@ func analyseCaesarShifts(checker *SpellChecker, input string) []string {
 	shifts := cryptography.CaesarShifts([]byte(input))
 	bestScore, bestShift := 0.0, 0
 	for i, s := range shifts {
-		score := Score(checker, string(s))
-		if score > bestScore {
-			bestScore = score
-			bestShift = i
+		if i > 0 {
+			score := Score(checker, string(s))
+			if score > bestScore {
+				bestScore = score
+				bestShift = i
+			}
 		}
 	}
 	if bestScore > 0.5 {
-		results = append(results, fmt.Sprintf("Caesar shift of %d might be English: %s", bestShift + 1, shifts[bestShift]))
+		results = append(results, fmt.Sprintf("Caesar shift of %d might be English: %s", bestShift, shifts[bestShift]))
 	}
 
 	return results
