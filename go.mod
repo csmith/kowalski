@@ -3,7 +3,7 @@ module github.com/csmith/kowalski/v5
 go 1.16
 
 require (
-	github.com/blevesearch/vellum v1.0.6
+	github.com/blevesearch/vellum v1.0.7
 	github.com/bwmarrin/discordgo v0.23.2
 	github.com/csmith/cryptography v1.0.0
 	github.com/gorilla/websocket v1.4.2 // indirect
