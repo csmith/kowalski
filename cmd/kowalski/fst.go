@@ -187,3 +187,139 @@ func (a anagramAutonoma) Accept(i int, b byte) int {
 
 	return i | errorMask
 }
+
+func FstMorse(input string, r Replier) {
+	autonoma := NewMorseAutonoma(input)
+
+	iterator, err := fst.Search(autonoma, nil, nil)
+	if err != nil {
+		r.reply("Error: %s", err.Error())
+		return
+	}
+
+	type Match struct {
+		Term  string
+		Score uint64
+	}
+
+	var matches []Match
+	for err == nil {
+		key, val := iterator.Current()
+		matches = append(matches, Match{Term: string(key), Score: val})
+		err = iterator.Next()
+	}
+
+	sort.Slice(matches, func(i, j int) bool {
+		return matches[i].Score > matches[j].Score
+	})
+
+	message := strings.Builder{}
+	message.WriteString("Matches for '")
+	message.WriteString(input)
+	message.WriteString("': ")
+
+	for i := range matches {
+		message.WriteString(fmt.Sprintf("`%s` (%d) ", matches[i].Term, matches[i].Score))
+		if message.Len() > 1900 {
+			message.WriteString("[...]")
+			break
+		}
+	}
+
+	r.reply("%s", message.String())
+}
+
+func init() {
+	if *fstModel != "" {
+		addTextCommand(FstMorse, "Attempts to find word matches from wikipedia using morse", "fstmorse")
+	}
+}
+
+var morseLetters = map[byte]string{
+	'a': ".-",
+	'b': "-...",
+	'c': "-.-.",
+	'd': "-..",
+	'e': ".",
+	'f': "..-.",
+	'g': "--.",
+	'h': "....",
+	'i': "..",
+	'j': ".---",
+	'k': "-.-",
+	'l': ".-..",
+	'm': "--",
+	'n': "-.",
+	'o': "---",
+	'p': ".--.",
+	'q': "--.-",
+	'r': ".-.",
+	's': "...",
+	't': "-",
+	'u': "..-",
+	'v': "...-",
+	'w': ".--",
+	'x': "-..-",
+	'y': "-.--",
+	'z': "--..",
+}
+
+const errorSentinel = -1
+
+type morseAutonoma struct {
+	chars string
+}
+
+func NewMorseAutonoma(term string) vellum.Automaton {
+	// Remove anything except - and .
+	pruned := strings.Builder{}
+	for _, c := range term {
+		if c == '.' || c == '-' {
+			pruned.WriteRune(c)
+		}
+	}
+
+	return &morseAutonoma{
+		chars: pruned.String(),
+	}
+}
+
+func (m *morseAutonoma) Start() int {
+	return 0
+}
+
+func (m *morseAutonoma) IsMatch(i int) bool {
+	return i == len(m.chars)
+}
+
+func (m *morseAutonoma) CanMatch(i int) bool {
+	return i <= len(m.chars) && i != errorSentinel
+}
+
+func (m *morseAutonoma) WillAlwaysMatch(i int) bool {
+	return false
+}
+
+func (m *morseAutonoma) Accept(i int, b byte) int {
+	if b == ' ' {
+		// Skip over spaces
+		return i
+	}
+
+	if b >= 'A' && b <= 'Z' {
+		b += 32
+	}
+
+	morse, ok := morseLetters[b]
+	if !ok {
+		return errorSentinel
+	}
+
+	remainder := m.chars[i:]
+	if strings.HasPrefix(remainder, morse) {
+		println("Moving to state ", i+len(morse), " after adding ", b)
+		return i + len(morse)
+	}
+
+	return errorSentinel
+}
