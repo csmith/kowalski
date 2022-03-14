@@ -101,12 +101,14 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 			urls = append(urls, m.Embeds[i].URL)
 		}
 
-		if len(urls) == 0 && (strings.HasPrefix("http://", arguments) || strings.HasPrefix("https://", arguments)) {
+		if len(urls) == 0 && (strings.HasPrefix(arguments, "http://") || strings.HasPrefix(arguments, "https://")) {
 			urls = append(urls, arguments)
 		}
 
 		if len(urls) > 0 {
 			c(arguments, urls, replier)
+		} else {
+			replier.reply("No image found. Try sending an image or a link to an image.")
 		}
 	}
 }
