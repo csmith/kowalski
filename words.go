@@ -9,16 +9,23 @@ import (
 func FindWords(checker *SpellChecker, input string) []string {
 	var res []string
 
+	findWords(checker, input, func(start, end int) {
+		res = append(res, input[start:end])
+	})
+
+	return res
+}
+
+// findWords finds all substrings of the given input, calling func with their start and end offsets.
+func findWords(checker *SpellChecker, input string, fn func(start, end int)) {
 	lower := strings.ToLower(input)
 	for i := 0; i < len(input); i++ {
-		for j := i+1; j < len(input) + 1 && checker.Prefix(lower[i:j]); j++ {
+		for j := i + 1; j < len(input)+1 && checker.Prefix(lower[i:j]); j++ {
 			if checker.Valid(lower[i:j]) {
-				res = append(res, lower[i:j])
+				fn(i, j)
 			}
 		}
 	}
-
-	return res
 }
 
 // WordSearch returns all words found by FindWords in the input word search grid. Words may occur horizontally,
@@ -65,7 +72,7 @@ func wordSearchLines(input []string) []string {
 	}
 
 	// Diagonals
-	for i := 0; i < len(input) + longestSide; i++ {
+	for i := 0; i < len(input)+longestSide; i++ {
 		pos := strings.Builder{}
 		neg := strings.Builder{}
 		for j := 0; j < width; j++ {

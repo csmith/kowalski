@@ -340,11 +340,10 @@ func Shift(input string, r Replier) {
 	out.WriteString("Caesar shifts:\n")
 	for i, s := range res {
 		score := kowalski.Score(checkers[0], string(s))
-		ioc := cryptography.IndexOfCoincidence(s)
 		if score > 0.5 {
 			s = []byte(fmt.Sprintf("**%s**", s))
 		}
-		out.WriteString(fmt.Sprintf("\t%2d: %s (%.5f)\n", i, s, ioc))
+		out.WriteString(fmt.Sprintf("\t%2d: %s (%.5f)\n", i, s, score))
 	}
 	r.reply(out.String())
 }

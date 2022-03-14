@@ -64,7 +64,7 @@ func analyseCaesarShifts(checker *SpellChecker, input string) []string {
 		}
 	}
 	if bestScore > 0.5 {
-		results = append(results, fmt.Sprintf("Caesar shift of %d might be English: %s", bestShift, shifts[bestShift]))
+		results = append(results, fmt.Sprintf("Caesar shift of %d might be English: %s (%.5f)", bestShift, shifts[bestShift], bestScore))
 	}
 
 	return results
@@ -83,12 +83,12 @@ func analyseAlternateChars(checker *SpellChecker, input string) []string {
 		}
 	}
 
-	if Score(checker, odds.String()) > 0.5 {
-		results = append(results, fmt.Sprintf("Alternating characters might be English: %s", odds.String()))
+	if score := Score(checker, odds.String()); score > 0.5 {
+		results = append(results, fmt.Sprintf("Alternating characters might be English: %s (%.5f)", odds.String(), score))
 	}
 
-	if Score(checker, evens.String()) > 0.5 {
-		results = append(results, fmt.Sprintf("Alternating characters might be English: %s", evens.String()))
+	if score := Score(checker, evens.String()); score > 0.5 {
+		results = append(results, fmt.Sprintf("Alternating characters might be English: %s (%.5f)", evens.String(), score))
 	}
 
 	return results
@@ -165,7 +165,7 @@ func analyseRunLengthEncoding(_ *SpellChecker, input string) []string {
 		num := 0
 		for i := range input {
 			if d, err := strconv.Atoi(string(input[i])); err == nil {
-				num = 10 * num + d
+				num = 10*num + d
 			} else {
 				message.WriteString(strings.Repeat(string(input[i]), num))
 				num = 0
@@ -205,19 +205,67 @@ func Analyse(checker *SpellChecker, input string) []string {
 // Score assigns a score to an input showing how likely it is to be English text. A score of 1.0 means almost
 // certainly English, a score of 0.0 means almost certainly not. This is fairly arbitrary and is not very good.
 func Score(checker *SpellChecker, input string) float64 {
-	const targetDensity = 2.0
-	density := float64(len(FindWords(checker, input))) / float64(len(input))
-	densityScore := math.Max(1-math.Abs(density-targetDensity), 0.1)
+	density := scoreWord(checker, input)
+	entropy := scoreEntropy(input)
+	bigram := scoreBigrams(input)
+	ioc := scoreIoc(input)
 
-	entropy := cryptography.ShannonEntropy([]byte(input))
-	entropyScore := 1.0
-	if entropy < 3.5 {
-		entropyScore = math.Max(entropy/3.5, 0.1)
-	} else if entropy > 5 {
-		entropyScore = math.Max(1-(entropy-5)/3, 0.1)
+	return density * entropy * bigram * ioc
+}
+
+// scoreWord returns a score for the text based on how many english words occur within it.
+func scoreWord(checker *SpellChecker, input string) float64 {
+	words := make([]int, len(input))
+	findWords(checker, input, func(start, end int) {
+		for i := start; i < end; i++ {
+			words[i]++
+		}
+	})
+
+	mean := float64(0)
+	total := 0
+	for i := range words {
+		if input[i] == ' ' {
+			continue
+		}
+
+		total++
+		mean += float64(words[i])
 	}
+	mean /= float64(total)
 
-	return densityScore * entropyScore
+	const targetDensity = 4.0
+	return math.Min(math.Pow(math.Max(mean/targetDensity, 0.01), 2), 1.0)
+}
+
+// scoreEntropy returns a score for the text based on whether it has a Shannon entropy typical of English text.
+func scoreEntropy(input string) float64 {
+	entropy := cryptography.ShannonEntropy([]byte(input))
+	score := 1.0
+	if entropy < 3.5 {
+		score = math.Max(entropy/3.5, 0.1)
+	} else if entropy > 5 {
+		score = math.Max(1-(entropy-5)/3, 0.1)
+	}
+	return score
+}
+
+// scoreBigrams returns a score for the text based on whether it has a bigram distribution typical of English text.
+func scoreBigrams(input string) float64 {
+	score := float64(0)
+	cleaned := strings.ToUpper(nonLetterRegex.ReplaceAllString(strings.ToLower(input), ""))
+	for i := range cleaned {
+		if i+1 < len(cleaned) {
+			b := data.Bigrams[cleaned[i:i+2]]
+			score += math.Log10(math.Max(b, 0.0001))
+		}
+	}
+	return math.Pow((10+score/float64(len(cleaned)))/float64(10), 2)
+}
+
+// scoreIoc returns a score for the text based on its Index of Coincidence compared to English.
+func scoreIoc(input string) float64 {
+	return 1 - math.Min(math.Abs(cryptography.IndexOfCoincidence([]byte(input))-cryptography.IndexOfCoincidenceEnglish), 1)
 }
 
 // splitTerms splits the input up into a list of the given terms. The input is expected
