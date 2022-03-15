@@ -30,20 +30,9 @@ var textCommands = map[string]TextCommand{}
 var fileCommands = map[string]FileCommand{}
 var help []HelpInfo
 
-func addTextCommand(c TextCommand, helpText string, names ...string) {
+func addCommand[T any](target map[string]T, c T, helpText string, names ...string) {
 	for i := range names {
-		textCommands[names[i]] = c
-	}
-
-	help = append(help, HelpInfo{
-		Triggers: names,
-		Message:  helpText,
-	})
-}
-
-func addFileCommand(c FileCommand, helpText string, names ...string) {
-	for i := range names {
-		fileCommands[names[i]] = c
+		target[names[i]] = c
 	}
 
 	help = append(help, HelpInfo{
@@ -70,7 +59,7 @@ func Anagram(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(Anagram, "Attempts to find single-word anagrams, expanding '\\*' and '?' wildcards", "anagram")
+	addCommand(textCommands, Anagram, "Attempts to find single-word anagrams, expanding '\\*' and '?' wildcards", "anagram")
 }
 
 func Analysis(input string, r Replier) {
@@ -83,7 +72,7 @@ func Analysis(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(Analysis, "Analyses text and provides a summary of potentially interesting findings", "analysis", "analyze", "analyse")
+	addCommand(textCommands, Analysis, "Analyses text and provides a summary of potentially interesting findings", "analysis", "analyze", "analyse")
 }
 
 func Chunk(input string, r Replier) {
@@ -107,7 +96,7 @@ func Chunk(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(Chunk, "Splits the text into chunks of a given size", "chunk")
+	addCommand(textCommands, Chunk, "Splits the text into chunks of a given size", "chunk")
 }
 
 func Colours(_ string, urls []string, r Replier) {
@@ -144,7 +133,7 @@ func Colours(_ string, urls []string, r Replier) {
 }
 
 func init() {
-	addFileCommand(Colours, "Counts the colours within the image", "colours", "colors")
+	addCommand(fileCommands, Colours, "Counts the colours within the image", "colours", "colors")
 }
 
 func HiddenPixels(_ string, urls []string, r Replier) {
@@ -171,7 +160,7 @@ func HiddenPixels(_ string, urls []string, r Replier) {
 }
 
 func init() {
-	addFileCommand(HiddenPixels, "Finds hidden pixels in images", "hidden", "hiddenpixels")
+	addCommand(fileCommands, HiddenPixels, "Finds hidden pixels in images", "hidden", "hiddenpixels")
 }
 
 func Letters(input string, r Replier) {
@@ -201,7 +190,7 @@ func Letters(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(Letters, "Shows a frequency histogram of the number of letters in the input", "letters")
+	addCommand(textCommands, Letters, "Shows a frequency histogram of the number of letters in the input", "letters")
 }
 
 func Match(input string, r Replier) {
@@ -222,7 +211,7 @@ func Match(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(Match, "Attempts to expand '?' wildcards to find a single-word match", "match")
+	addCommand(textCommands, Match, "Attempts to expand '?' wildcards to find a single-word match", "match")
 }
 
 func Morse(input string, r Replier) {
@@ -231,7 +220,7 @@ func Morse(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(Morse, "Attempts to split a morse code input to spell a single word", "morse")
+	addCommand(textCommands, Morse, "Attempts to split a morse code input to spell a single word", "morse")
 }
 
 func MultiAnagram(input string, r Replier) {
@@ -252,7 +241,7 @@ func MultiAnagram(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(MultiAnagram, "Attempts to find multi-word anagrams, expanding '?' wildcards", "multigram", "multianagram")
+	addCommand(textCommands, MultiAnagram, "Attempts to find multi-word anagrams, expanding '?' wildcards", "multigram", "multianagram")
 }
 
 func MultiMatch(input string, r Replier) {
@@ -273,7 +262,7 @@ func MultiMatch(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(MultiMatch, "Attempts to expand '?' wildcards to find multi-word matches", "multimatch")
+	addCommand(textCommands, MultiMatch, "Attempts to expand '?' wildcards to find multi-word matches", "multimatch")
 }
 
 func OffByOne(input string, r Replier) {
@@ -294,7 +283,7 @@ func OffByOne(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(OffByOne, "Finds all words that are one character different from the input", "obo", "offbyone", "ob1")
+	addCommand(textCommands, OffByOne, "Finds all words that are one character different from the input", "obo", "offbyone", "ob1")
 }
 
 func RGB(_ string, urls []string, r Replier) {
@@ -331,7 +320,7 @@ func RGB(_ string, urls []string, r Replier) {
 }
 
 func init() {
-	addFileCommand(RGB, "Splits an image into its red, green and blue channels", "rgb")
+	addCommand(fileCommands, RGB, "Splits an image into its red, green and blue channels", "rgb")
 }
 
 func Shift(input string, r Replier) {
@@ -349,7 +338,7 @@ func Shift(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(Shift, "Shows the result of the 25 possible caesar shifts", "shift", "caesar")
+	addCommand(textCommands, Shift, "Shows the result of the 25 possible caesar shifts", "shift", "caesar")
 }
 
 func T9(input string, r Replier) {
@@ -362,7 +351,7 @@ func T9(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(T9, "Attempts to treat a series of numbers as T9 input to spell a single word", "t9")
+	addCommand(textCommands, T9, "Attempts to treat a series of numbers as T9 input to spell a single word", "t9")
 }
 
 func Transpose(input string, r Replier) {
@@ -370,7 +359,7 @@ func Transpose(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(Transpose, "Transposes columns to rows and rows to columns", "transpose")
+	addCommand(textCommands, Transpose, "Transposes columns to rows and rows to columns", "transpose")
 }
 
 func WordSearch(input string, r Replier) {
@@ -384,7 +373,7 @@ func WordSearch(input string, r Replier) {
 }
 
 func init() {
-	addTextCommand(WordSearch, "Searches for words in the given text grid", "wordsearch")
+	addCommand(textCommands, WordSearch, "Searches for words in the given text grid", "wordsearch")
 }
 
 func Help(_ string, r Replier) {
@@ -408,5 +397,5 @@ func Help(_ string, r Replier) {
 }
 
 func init() {
-	addTextCommand(Help, "Shows this help text", "help")
+	addCommand(textCommands, Help, "Shows this help text", "help")
 }

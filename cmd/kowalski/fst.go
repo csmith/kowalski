@@ -41,7 +41,7 @@ func FstAnagram(input string, r Replier) {
 
 func init() {
 	if *fstModel != "" {
-		addTextCommand(FstAnagram, "Attempts to find anagrams from wikipedia, expanding '\\*' wildcards", "fstanagram", "fstagram")
+		addCommand(textCommands, FstAnagram, "Attempts to find anagrams from wikipedia, expanding '\\*' wildcards", "fstanagram", "fstagram")
 	}
 }
 
@@ -57,7 +57,7 @@ func FstRegex(input string, r Replier) {
 
 func init() {
 	if *fstModel != "" {
-		addTextCommand(FstRegex, "Attempts to find word matches from wikipedia using regexp", "fstregex", "fstre")
+		addCommand(textCommands, FstRegex, "Attempts to find word matches from wikipedia using regexp", "fstregex", "fstre")
 	}
 }
 
@@ -67,7 +67,7 @@ func FstMorse(input string, r Replier) {
 
 func init() {
 	if *fstModel != "" {
-		addTextCommand(FstMorse, "Attempts to find word matches from wikipedia using morse", "fstmorse")
+		addCommand(textCommands, FstMorse, "Attempts to find word matches from wikipedia using morse", "fstmorse")
 	}
 }
 

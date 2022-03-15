@@ -1,8 +1,8 @@
-FROM golang:1.16 AS build
+FROM reg.c5h.io/golang AS build
 WORKDIR /app
 COPY . /app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o /go/bin/app ./cmd/kowalski
+RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o /go/bin/kowalski ./cmd/kowalski
 
-FROM gcr.io/distroless/base-debian10
-COPY --from=build /go/bin/app /
-CMD ["/app"]
+FROM reg.c5h.io/base
+COPY --from=build /go/bin/kowalski /
+CMD ["/kowalski"]

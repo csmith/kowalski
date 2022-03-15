@@ -113,19 +113,14 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func parseCommand(input string) (command, arguments string, ok bool) {
-	parts := strings.SplitN(input, " ", 2)
-	command = strings.ToLower(parts[0])
-	if !strings.HasPrefix(command, *prefix) {
-		return
+func parseCommand(input string) (string, string, bool) {
+	if !strings.HasPrefix(input, *prefix) {
+		return "", "", false
 	}
 
-	command = strings.TrimPrefix(command, *prefix)
-	if len(parts) > 1 {
-		arguments = parts[1]
-	}
-	ok = true
-	return
+	command, arguments, _ := strings.Cut(input, " ")
+	command = strings.TrimPrefix(strings.ToLower(command), *prefix)
+	return command, arguments, true
 }
 
 func subtract(input, exclusions []string) []string {

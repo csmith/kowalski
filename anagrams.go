@@ -4,6 +4,8 @@ import (
 	"context"
 	"sort"
 	"strings"
+
+	"golang.org/x/exp/slices"
 )
 
 // Anagram finds all single-word anagrams of the given word, expanding '?' as a single wildcard character
@@ -50,7 +52,7 @@ func anagram(ctx context.Context, checker *SpellChecker, word string, multiWord 
 	}
 
 	sort.Strings(res)
-	return unique(res), nil
+	return slices.Compact(res), nil
 }
 
 // onlyAscendingWords returns a slice that contains all the entries from input that meet the following criteria:
