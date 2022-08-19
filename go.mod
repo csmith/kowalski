@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/blevesearch/vellum v1.0.8
-	github.com/bwmarrin/discordgo v0.25.0
+	github.com/bwmarrin/discordgo v0.26.0
 	github.com/csmith/cryptography v1.0.0
 	github.com/willf/bloom v2.0.3+incompatible
 	golang.org/x/exp v0.0.0-20220314205449-43aec2f8a4e7
