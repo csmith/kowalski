@@ -7,8 +7,8 @@ require (
 	github.com/bwmarrin/discordgo v0.26.1
 	github.com/csmith/cryptography v1.0.0
 	github.com/willf/bloom v2.0.3+incompatible
-	golang.org/x/exp v0.0.0-20220314205449-43aec2f8a4e7
-	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb
+	golang.org/x/exp v0.0.0-20221028150844-83b7d23a625f
+	golang.org/x/image v0.1.0
 )
 
 require (
@@ -17,6 +17,6 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/willf/bitset v1.1.11 // indirect
-	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b // indirect
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 )

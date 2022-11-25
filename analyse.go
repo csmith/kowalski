@@ -3,6 +3,7 @@ package kowalski
 import (
 	"fmt"
 	"math"
+	"math/big"
 	"regexp"
 	"strconv"
 	"strings"
@@ -181,11 +182,29 @@ func analyseRunLengthEncoding(_ *SpellChecker, input string) []string {
 	return results
 }
 
+func analysePrimes(checker *SpellChecker, input string) []string {
+	var results []string
+
+	output := strings.Builder{}
+	for i := range input {
+		if big.NewInt(int64(i + 1)).ProbablyPrime(0) {
+			output.WriteByte(input[i])
+		}
+	}
+
+	if score := Score(checker, output.String()); score > 0.5 {
+		results = append(results, fmt.Sprintf("Prime characters might be English: %s (%.5f)", output.String(), score))
+	}
+
+	return results
+}
+
 var analysers = []analyser{
 	analyseEntropy,
 	analyseDataReferences,
 	analyseCaesarShifts,
 	analyseAlternateChars,
+	analysePrimes,
 	analyseLength,
 	analyseDistribution,
 	analyseRunLengthEncoding,
