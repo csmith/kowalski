@@ -8,7 +8,7 @@ require (
 	github.com/csmith/cryptography v1.0.0
 	github.com/willf/bloom v2.0.3+incompatible
 	golang.org/x/exp v0.0.0-20221028150844-83b7d23a625f
-	golang.org/x/image v0.5.0
+	golang.org/x/image v0.7.0
 )
 
 require (
@@ -18,5 +18,5 @@ require (
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/willf/bitset v1.1.11 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 )
