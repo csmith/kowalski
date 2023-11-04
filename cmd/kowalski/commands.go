@@ -68,7 +68,7 @@ func Analysis(input string, r Replier) {
 	if len(res) == 0 {
 		r.reply("Analysis: nothing interesting found")
 	}
-	r.reply("Analysis:\n\t%s", strings.Join(res, "\n\t"))
+	r.reply("Analysis:\n- %s", strings.Join(res, "\n- "))
 }
 
 func init() {

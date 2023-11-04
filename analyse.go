@@ -199,12 +199,40 @@ func analysePrimes(checker *SpellChecker, input string) []string {
 	return results
 }
 
+func analyseCommonLetters(_ *SpellChecker, input string) []string {
+	words := strings.Fields(strings.ToLower(input))
+
+	var matches [26]int
+	for i := range words {
+		for c := range words[i] {
+			letter := words[i][c]
+			if letter >= 'a' && letter <= 'z' {
+				matches[letter-'a']++
+			}
+		}
+	}
+
+	common := ""
+	for i := range matches {
+		if matches[i] == len(words) {
+			common += string(rune('A' + i))
+		}
+	}
+
+	if len(common) > 0 {
+		return []string{fmt.Sprintf("All words contain the letters: %s", common)}
+	} else {
+		return nil
+	}
+}
+
 var analysers = []analyser{
 	analyseEntropy,
 	analyseDataReferences,
 	analyseCaesarShifts,
 	analyseAlternateChars,
 	analysePrimes,
+	analyseCommonLetters,
 	analyseLength,
 	analyseDistribution,
 	analyseRunLengthEncoding,
