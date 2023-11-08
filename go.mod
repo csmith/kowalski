@@ -8,7 +8,7 @@ require (
 	github.com/csmith/cryptography v1.0.0
 	github.com/willf/bloom v2.0.3+incompatible
 	golang.org/x/exp v0.0.0-20221028150844-83b7d23a625f
-	golang.org/x/image v0.11.0
+	golang.org/x/image v0.14.0
 )
 
 require (
