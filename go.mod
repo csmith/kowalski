@@ -3,7 +3,7 @@ module github.com/csmith/kowalski/v5
 go 1.18
 
 require (
-	github.com/blevesearch/vellum v1.0.10
+	github.com/blevesearch/vellum v1.0.11
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/csmith/cryptography v1.0.0
 	github.com/willf/bloom v2.0.3+incompatible
