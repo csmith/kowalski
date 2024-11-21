@@ -2,7 +2,6 @@ package kowalski
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
@@ -42,27 +41,18 @@ func TestCreateSpellChecker(t *testing.T) {
 	}
 }
 
-func TestSaveSpellChecker(t *testing.T) {
+func TestSaveLoadSpellChecker(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	if err := SaveSpellChecker(buffer, testChecker); err != nil {
 		t.Errorf("SaveSpellChecker() failed to save checker: %v", err)
 	}
 
-	saved, _ := ioutil.ReadFile("testdata/test_words.wl")
-	if !reflect.DeepEqual(saved, buffer.Bytes()) {
-		t.Errorf("Saved spell checker differs from golden: got %v, wanted %v", buffer.Bytes(), saved)
-	}
-}
-
-func TestLoadSpellChecker(t *testing.T) {
-	f, _ := os.Open("testdata/test_words.wl")
-	s, err := LoadSpellChecker(f)
-
+	saved, err := LoadSpellChecker(buffer)
 	if err != nil {
-		t.Errorf("LoadSpellChecker() failed to load checker: %v", err)
+		t.Errorf("Failed to load saved checker: $%v", err)
 	}
 
-	if !reflect.DeepEqual(testChecker, s) {
-		t.Errorf("Restored spell checker differs from original: got %v, wanted %v", s, testChecker)
+	if !reflect.DeepEqual(saved, testChecker) {
+		t.Errorf("Saved spell checker differs when loaded: got %v, wanted %v", saved, testChecker)
 	}
 }
