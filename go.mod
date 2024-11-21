@@ -1,6 +1,8 @@
 module github.com/csmith/kowalski/v5
 
-go 1.18
+go 1.23
+
+toolchain go1.23.2
 
 require (
 	github.com/blevesearch/vellum v1.0.11
