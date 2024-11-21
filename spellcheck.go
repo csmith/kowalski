@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/gob"
 	"fmt"
-	"github.com/willf/bloom"
+	"github.com/bits-and-blooms/bloom/v3"
 	"io"
 	"strings"
 )
