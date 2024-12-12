@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/bits-and-blooms/bloom/v3 v3.7.0
-	github.com/blevesearch/vellum v1.0.11
+	github.com/blevesearch/vellum v1.1.0
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/csmith/cryptography v1.0.0
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
