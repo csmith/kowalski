@@ -1,7 +1,8 @@
 module github.com/csmith/kowalski/v5
 
-go 1.23
-toolchain go1.23.2
+go 1.23.0
+
+toolchain go1.24.0
 
 require (
 	github.com/bits-and-blooms/bloom/v3 v3.7.0
