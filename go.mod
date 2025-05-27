@@ -7,7 +7,7 @@ toolchain go1.24.0
 require (
 	github.com/bits-and-blooms/bloom/v3 v3.7.0
 	github.com/blevesearch/vellum v1.1.0
-	github.com/bwmarrin/discordgo v0.28.1
+	github.com/bwmarrin/discordgo v0.29.0
 	github.com/csmith/cryptography v1.0.0
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
 	golang.org/x/image v0.27.0
