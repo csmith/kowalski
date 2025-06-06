@@ -8,7 +8,7 @@ require (
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/csmith/cryptography v1.1.0
 	golang.org/x/exp v0.0.0-20250531010427-b6e5de432a8b
-	golang.org/x/image v0.27.0
+	golang.org/x/image v0.28.0
 )
 
 require (
