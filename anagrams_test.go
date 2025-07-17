@@ -64,7 +64,6 @@ func TestMultiAnagrams(t *testing.T) {
 	}
 }
 
-
 func TestPermute(t *testing.T) {
 	tests := []struct {
 		name       string

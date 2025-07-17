@@ -3,7 +3,7 @@
 ![Kowalski, analysis](kowalski.jpg)
 
 Kowalski is a Go library for performing various operations to help solve puzzles,
-and an accompanying Discord bot.
+and an accompanying Discord bot and web UI.
 
 ## Supported functions
 
@@ -41,7 +41,7 @@ package example
 import (
   "os"
 
-  "github.com/csmith/kowalski/v5"
+  "github.com/csmith/kowalski/v6"
 )
 
 func create() {
@@ -62,7 +62,7 @@ package example
 import (
   "os"
 
-  "github.com/csmith/kowalski/v5"
+  "github.com/csmith/kowalski/v6"
 )
 
 func create() {
@@ -94,7 +94,7 @@ package example
 
 import (
   "github.com/blevesearch/vellum"
-  "github.com/csmith/kowalski/v5/fst"
+  "github.com/csmith/kowalski/v6/fst"
 )
 
 func create() {
@@ -118,7 +118,8 @@ func create() {
 
 ## Discord bot
 
-This repository also contains a Discord bot that allows users to perform analysis.
+This repository also contains a Discord bot in `cmd/discord` that allows users
+to perform analysis.
 
 It currently supports these commands:
 
@@ -144,3 +145,9 @@ It currently supports these commands:
 !fstregex Attempts to find word matches from wikipedia using regexp [Aliases: !fstre]
 !fstmorse Attempts to find word matches from wikipedia using morse
 ```
+
+## Web UI
+
+There's also a web UI in `cmd/web`. It only listens on HTTP (put it behind
+a TLS terminating proxy if you're making it public!). It supports all
+the same commands as the Discord bot.

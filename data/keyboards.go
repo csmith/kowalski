@@ -40,7 +40,9 @@ var QwertyLowerRow = []string{
 
 // QwertyUpperTwoRows contains the characters in the top two rows of a QWERTY keyboard.
 var QwertyUpperTwoRows = append(QwertyUpperRow, QwertyHomeRow...)
+
 // QwertyLowerTwoRows contains the characters in the lower two rows of a QWERTY keyboard.
 var QwertyLowerTwoRows = append(QwertyLowerRow, QwertyHomeRow...)
+
 // QwertyOuterRows contains the characters in the outer two rows of a QWERTY keyboard.
 var QwertyOuterRows = append(QwertyLowerRow, QwertyUpperRow...)

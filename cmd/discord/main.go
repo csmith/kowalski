@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/csmith/kowalski/v5"
+	"github.com/csmith/kowalski/v6"
 )
 
 var (

@@ -1,7 +1,7 @@
 package data
 
 // Iso3166Alpha2s contains the ISO 3166-1 Alpha-2 codes for all countries.
-var Iso3166Alpha2s = []string {
+var Iso3166Alpha2s = []string{
 	"AF",
 	"AX",
 	"AL",

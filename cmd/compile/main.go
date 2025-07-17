@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
-	"github.com/csmith/kowalski/v5"
+	"github.com/csmith/kowalski/v6"
 	"io"
 	"io/ioutil"
 	"log"
@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	inFile = flag.String("in", "-", "File to read words from, or '-' for stdin")
+	inFile  = flag.String("in", "-", "File to read words from, or '-' for stdin")
 	outFile = flag.String("out", "words.wl", "File to write compiled spell checker to")
 )
 

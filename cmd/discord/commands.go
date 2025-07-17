@@ -10,7 +10,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/csmith/cryptography"
-	"github.com/csmith/kowalski/v5"
+	"github.com/csmith/kowalski/v6"
 )
 
 type Replier interface {

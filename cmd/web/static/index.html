@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kowalski Web Interface</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Kowalski, analysis!</h1>
+        
+        <div class="input-section">
+            <h2>Input</h2>
+            <textarea id="input" placeholder="Enter your text here..." rows="5"></textarea>
+            
+            <div class="input-row">
+                <div class="file-input" id="fileInput">
+                    <label for="imageFile">Image:</label>
+                    <input type="file" id="imageFile" accept="image/*">
+                </div>
+                
+                <div class="chunk-input" id="chunkInput">
+                    <label for="chunkSizes">Chunk sizes:</label>
+                    <input type="text" id="chunkSizes" placeholder="e.g., 3 or 2 3 4">
+                </div>
+            </div>
+        </div>
+        
+        <div class="commands-section">
+            <h2>Commands</h2>
+            <div class="command-grid">
+                <h3>Single Word Commands</h3>
+                <div class="command-buttons">
+                    <button data-command="multianagram" data-type="text">Anagram</button>
+                    <button data-command="multimatch" data-type="text">Match</button>
+                    <button data-command="offbyone" data-type="text">Off By One</button>
+                </div>
+                
+                <h3>Text Commands</h3>
+                <div class="command-buttons">
+                    <button data-command="analysis" data-type="text">Analysis</button>
+                    <button data-command="chunk" data-type="text" data-special="chunk">Chunk</button>
+                    <button data-command="letters" data-type="text">Letter Distribution</button>
+                    <button data-command="morse" data-type="text">Morse</button>
+                    <button data-command="shift" data-type="text">Caesar Shift</button>
+                    <button data-command="t9" data-type="text">T9</button>
+                    <button data-command="transpose" data-type="text">Transpose</button>
+                    <button data-command="wordsearch" data-type="text">Word Search</button>
+                </div>
+                
+                <h3>Image Commands</h3>
+                <div class="command-buttons">
+                    <button data-command="colours" data-type="image">Extract Colours</button>
+                    <button data-command="hidden" data-type="image">Hidden Pixels</button>
+                    <button data-command="rgb" data-type="image">Split RGB</button>
+                </div>
+                
+                <div id="fstCommands" style="display: none;">
+                    <h3>FST Commands</h3>
+                    <div class="command-buttons">
+                        <button data-command="fstanagram" data-type="text">FST Anagram</button>
+                        <button data-command="fstregex" data-type="text">FST Regex</button>
+                        <button data-command="fstmorse" data-type="text">FST Morse</button>
+                        <button data-command="wordlink" data-type="text">Word Link</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="history-section">
+            <h2>Results History</h2>
+            <button id="clearHistory">Clear History</button>
+            <div id="history"></div>
+        </div>
+    </div>
+    
+    <script src="/script.js"></script>
+</body>
+</html>

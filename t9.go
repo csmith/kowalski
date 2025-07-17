@@ -2,7 +2,7 @@ package kowalski
 
 import "fmt"
 
-var t9mapping = map[uint8][]rune {
+var t9mapping = map[uint8][]rune{
 	'2': []rune("abc"),
 	'3': []rune("def"),
 	'4': []rune("ghi"),

@@ -1,7 +1,7 @@
 package data
 
 // CrsCodes contains all codes used for National Rail stations in the UK.
-var CrsCodes = []string {
+var CrsCodes = []string{
 	"ABW",
 	"ABE",
 	"ACY",

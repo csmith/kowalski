@@ -10,7 +10,7 @@ import (
 
 	"github.com/blevesearch/vellum"
 	"github.com/blevesearch/vellum/regexp"
-	"github.com/csmith/kowalski/v5/fst"
+	"github.com/csmith/kowalski/v6/fst"
 )
 
 var fstModel = flag.String("fst-model", "", "Path to FST for fast word operations")
@@ -73,6 +73,7 @@ func init() {
 }
 
 func WordLink(input string, r Replier) {
+	input = strings.ToLower(input)
 	parts := strings.Split(input, " ")
 	if len(parts) != 2 {
 		r.reply("Invalid input, must specify two words to link")

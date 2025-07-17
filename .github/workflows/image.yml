@@ -9,3 +9,11 @@ jobs:
   build:
     uses: csmith/github-workflows/.github/workflows/build-image.yml@master
     secrets: inherit
+    dockerfile: web.Dockerfile
+    image: kowalski/web
+
+  build:
+    uses: csmith/github-workflows/.github/workflows/build-image.yml@master
+    secrets: inherit
+    dockerfile: discord.Dockerfile
+    image: kowalski/discord

@@ -1,5 +1,21 @@
 # Changelog
 
+## 6.0.0 - 2025-07-17
+
+### Breaking changes
+
+* Discord bot moved from `cmd/kowalski` to `cmd/discord`
+* Discord bot docker images are now named `kowalski/discord`
+
+### Features
+
+* Added a web UI
+
+### Other changes
+
+* Fixed `wordlink` not lowercasing its inputs properly
+* Updated docker images to use `greboid/dockerbase`
+
 ## 5.4.0 - 2025-06-05
 
 ### Changes

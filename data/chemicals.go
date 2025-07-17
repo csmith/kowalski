@@ -1,7 +1,7 @@
 package data
 
 // ChemicalElements contains the symbols for chemical elements.
-var ChemicalElements = []string {
+var ChemicalElements = []string{
 	"H",
 	"He",
 	"Li",
