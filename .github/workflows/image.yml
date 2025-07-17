@@ -11,11 +11,11 @@ jobs:
     secrets: inherit
     with:
       dockerfile: web.Dockerfile
-      image: kowalski/web
+      image: csmith/kowalski/web
 
   discord:
     uses: csmith/github-workflows/.github/workflows/build-image.yml@master
     secrets: inherit
     with:
       dockerfile: discord.Dockerfile
-      image: kowalski/discord
+      image: csmith/kowalski/discord
