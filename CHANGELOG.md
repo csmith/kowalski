@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.0.1 - 2025-07-17
+
+### Changes
+
+* No code changes, just build process fixes.
+
 ## 6.0.0 - 2025-07-17
 
 ### Breaking changes

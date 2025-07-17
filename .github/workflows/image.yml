@@ -6,13 +6,13 @@ on:
     tags:
       - v*
 jobs:
-  build:
+  web:
     uses: csmith/github-workflows/.github/workflows/build-image.yml@master
     secrets: inherit
     dockerfile: web.Dockerfile
     image: kowalski/web
 
-  build:
+  discord:
     uses: csmith/github-workflows/.github/workflows/build-image.yml@master
     secrets: inherit
     dockerfile: discord.Dockerfile
