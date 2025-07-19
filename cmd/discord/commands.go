@@ -362,6 +362,14 @@ func init() {
 	addCommand(textCommands, Transpose, "Transposes columns to rows and rows to columns", "transpose")
 }
 
+func FirstLetters(input string, r Replier) {
+	r.reply("First letters:\n\n%s", kowalski.FirstLetters(input))
+}
+
+func init() {
+	addCommand(textCommands, FirstLetters, "Extracts the first letter of each word, preserving line breaks", "firstletters", "fl")
+}
+
 func WordSearch(input string, r Replier) {
 	input = strings.ToLower(input)
 	res := kowalski.MultiplexWordSearch(checkers, strings.Split(input, "\n"))

@@ -189,6 +189,8 @@ func processCommand(command, input string) (interface{}, error) {
 		return processTranspose(input)
 	case "wordsearch":
 		return processWordSearch(input)
+	case "firstletters":
+		return processFirstLetters(input)
 	case "fstanagram":
 		if fstTransducer != nil {
 			return processFstAnagram(input)

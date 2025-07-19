@@ -304,6 +304,15 @@ func processRGB(file io.Reader) (interface{}, error) {
 	}, nil
 }
 
+func processFirstLetters(input string) (interface{}, error) {
+	result := kowalski.FirstLetters(input)
+
+	return map[string]interface{}{
+		"input":  input,
+		"result": result,
+	}, nil
+}
+
 func subtract(input, exclusions []string) []string {
 	var res []string
 	for i := range input {

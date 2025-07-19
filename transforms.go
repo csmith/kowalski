@@ -1,6 +1,9 @@
 package kowalski
 
-import "strings"
+import (
+	"strings"
+	"unicode"
+)
 
 // Chunk takes the input, and splits it up into chunks of the given length. If the input is longer than the list of
 // part lengths, the lengths will be repeated.
@@ -40,4 +43,33 @@ func Transpose(input []string) []string {
 		i++
 	}
 	return res
+}
+
+// FirstLetters extracts the first letter of each word in the input, preserving line breaks.
+// Punctuation is ignored - only letters are extracted.
+func FirstLetters(input string) string {
+	lines := strings.Split(input, "\n")
+	var result []string
+
+	for _, line := range lines {
+		if line == "" {
+			result = append(result, "")
+			continue
+		}
+
+		words := strings.Fields(line)
+		var firstLetters []string
+		for _, word := range words {
+			// Find the first letter (ignoring punctuation)
+			for _, r := range word {
+				if unicode.IsLetter(r) {
+					firstLetters = append(firstLetters, string(r))
+					break
+				}
+			}
+		}
+		result = append(result, strings.Join(firstLetters, ""))
+	}
+
+	return strings.Join(result, "\n")
 }

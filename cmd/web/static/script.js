@@ -291,6 +291,9 @@ function renderResult(command, result) {
         case 'transpose':
             return `<pre>${escapeHtml(result.result)}</pre>`;
             
+        case 'firstletters':
+            return `<pre>${escapeHtml(result.result)}</pre>`;
+            
         case 'wordsearch':
             return renderWordSearch(result);
             
