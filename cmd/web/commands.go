@@ -313,6 +313,56 @@ func processFirstLetters(input string) (interface{}, error) {
 	}, nil
 }
 
+func processReverse(input string) (interface{}, error) {
+	result := kowalski.Reverse(input)
+
+	return map[string]interface{}{
+		"input":  input,
+		"result": result,
+	}, nil
+}
+
+func processCheckWords(input string) (interface{}, error) {
+	// Get results from all checkers
+	allResults := kowalski.MultiplexCheckWords(checkers, input)
+
+	// Format the results for the frontend
+	// Combine results from all checkers to show which checker(s) validated each word
+	lineCount := len(allResults[0])
+	var formattedLines [][]map[string]interface{}
+
+	for lineIdx := 0; lineIdx < lineCount; lineIdx++ {
+		var lineWords []map[string]interface{}
+
+		// Get word count from first checker (all should have same structure)
+		wordCount := len(allResults[0][lineIdx])
+
+		for wordIdx := 0; wordIdx < wordCount; wordIdx++ {
+			word := allResults[0][lineIdx][wordIdx].Word
+
+			// Check which checker(s) validated this word
+			validInCheckers := []int{}
+			for checkerIdx, checkerResults := range allResults {
+				if checkerResults[lineIdx][wordIdx].Valid {
+					validInCheckers = append(validInCheckers, checkerIdx)
+				}
+			}
+
+			lineWords = append(lineWords, map[string]interface{}{
+				"word":     word,
+				"valid":    len(validInCheckers) > 0,
+				"checkers": validInCheckers,
+			})
+		}
+		formattedLines = append(formattedLines, lineWords)
+	}
+
+	return map[string]interface{}{
+		"input":  input,
+		"result": formattedLines,
+	}, nil
+}
+
 func subtract(input, exclusions []string) []string {
 	var res []string
 	for i := range input {

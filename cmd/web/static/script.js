@@ -294,6 +294,12 @@ function renderResult(command, result) {
         case 'firstletters':
             return `<pre>${escapeHtml(result.result)}</pre>`;
             
+        case 'reverse':
+            return `<pre>${escapeHtml(result.result)}</pre>`;
+            
+        case 'checkwords':
+            return renderCheckWords(result.result);
+            
         case 'wordsearch':
             return renderWordSearch(result);
             
@@ -469,6 +475,43 @@ function renderWordLink(result) {
         html += `<span class="result-item">${escapeHtml(link.term)} (${link.score})</span>`;
     });
     html += '</div>';
+    return html;
+}
+
+function renderCheckWords(lines) {
+    if (!lines || lines.length === 0) {
+        return '<div>No words to check</div>';
+    }
+    
+    let html = '<div>';
+    lines.forEach((line, lineIndex) => {
+        if (lineIndex > 0) html += '<br>';
+        if (line && line.length > 0) {
+            line.forEach((wordData, wordIndex) => {
+                if (wordIndex > 0) html += ' ';
+                if (wordData.valid) {
+                    // Color based on which checker(s) validated it
+                    let color = 'green';
+                    let title = 'Valid in: ';
+                    if (wordData.checkers && wordData.checkers.length > 0) {
+                        if (wordData.checkers.includes(0) && !wordData.checkers.includes(1)) {
+                            title += 'primary dictionary';
+                        } else if (!wordData.checkers.includes(0) && wordData.checkers.includes(1)) {
+                            color = '#ff6600'; // orange for backup dictionary only
+                            title += 'backup dictionary only';
+                        } else {
+                            title += 'both dictionaries';
+                        }
+                    }
+                    html += `<span style="color: ${color}; font-weight: bold;" title="${title}">${escapeHtml(wordData.word)}</span>`;
+                } else {
+                    html += `<span style="color: #999;">${escapeHtml(wordData.word)}</span>`;
+                }
+            });
+        }
+    });
+    html += '</div>';
+    html += '<div style="margin-top: 10px; font-size: 0.9em; color: #666;">Green = primary dictionary, Orange = backup dictionary only, Gray = not found</div>';
     return html;
 }
 

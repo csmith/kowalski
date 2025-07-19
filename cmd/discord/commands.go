@@ -370,6 +370,62 @@ func init() {
 	addCommand(textCommands, FirstLetters, "Extracts the first letter of each word, preserving line breaks", "firstletters", "fl")
 }
 
+func Reverse(input string, r Replier) {
+	r.reply("Reversed:\n\n%s", kowalski.Reverse(input))
+}
+
+func init() {
+	addCommand(textCommands, Reverse, "Reverses the text, stripping punctuation but preserving spaces and line breaks", "reverse", "rev")
+}
+
+func CheckWords(input string, r Replier) {
+	// Get results from all checkers
+	allResults := kowalski.MultiplexCheckWords(checkers, input)
+
+	output := strings.Builder{}
+	output.WriteString("Word check results:\n\n")
+
+	// Process each line
+	lineCount := len(allResults[0])
+	for lineIdx := 0; lineIdx < lineCount; lineIdx++ {
+		if lineIdx > 0 {
+			output.WriteString("\n")
+		}
+
+		// Process each word
+		wordCount := len(allResults[0][lineIdx])
+		for wordIdx := 0; wordIdx < wordCount; wordIdx++ {
+			if wordIdx > 0 {
+				output.WriteString(" ")
+			}
+
+			word := allResults[0][lineIdx][wordIdx].Word
+			validIn0 := allResults[0][lineIdx][wordIdx].Valid
+			validIn1 := false
+			if len(allResults) > 1 {
+				validIn1 = allResults[1][lineIdx][wordIdx].Valid
+			}
+
+			if validIn0 && validIn1 {
+				output.WriteString(fmt.Sprintf("**%s**", word))
+			} else if validIn0 {
+				output.WriteString(fmt.Sprintf("**%s**", word))
+			} else if validIn1 {
+				output.WriteString(fmt.Sprintf("_%s_", word))
+			} else {
+				output.WriteString(word)
+			}
+		}
+	}
+
+	output.WriteString("\n\n**bold** = primary dict, _italic_ = backup dict only")
+	r.reply(output.String())
+}
+
+func init() {
+	addCommand(textCommands, CheckWords, "Checks which words are valid in dictionaries (**bold** = primary, _italic_ = backup only)", "checkwords", "cw")
+}
+
 func WordSearch(input string, r Replier) {
 	input = strings.ToLower(input)
 	res := kowalski.MultiplexWordSearch(checkers, strings.Split(input, "\n"))

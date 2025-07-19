@@ -80,6 +80,24 @@ func MultiplexWordSearch(checkers []*SpellChecker, pattern []string, opts ...Mul
 	}, opts)
 }
 
+// MultiplexCheckWords performs the CheckWords operation over a number of different checkers.
+// Returns results for each checker separately.
+func MultiplexCheckWords(checkers []*SpellChecker, input string) [][][]WordCheckResult {
+	results := make([][][]WordCheckResult, len(checkers))
+	wg := &sync.WaitGroup{}
+
+	for i := range checkers {
+		wg.Add(1)
+		go func(i int) {
+			results[i] = CheckWords(checkers[i], input)
+			wg.Done()
+		}(i)
+	}
+
+	wg.Wait()
+	return results
+}
+
 func multiplex(checkers []*SpellChecker, f func(checker *SpellChecker) []string, opts []MultiplexOption) [][]string {
 	o := &multiplexOptions{}
 	for i := range opts {

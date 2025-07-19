@@ -191,6 +191,10 @@ func processCommand(command, input string) (interface{}, error) {
 		return processWordSearch(input)
 	case "firstletters":
 		return processFirstLetters(input)
+	case "reverse":
+		return processReverse(input)
+	case "checkwords":
+		return processCheckWords(input)
 	case "fstanagram":
 		if fstTransducer != nil {
 			return processFstAnagram(input)
