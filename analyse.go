@@ -193,6 +193,36 @@ func analyseWordCount(_ *SpellChecker, input string) []string {
 	return results
 }
 
+func analysePalindromes(_ *SpellChecker, input string) []string {
+	var results []string
+
+	words := strings.Fields(input)
+	var palindromes []string
+
+	for _, word := range words {
+		// Clean the word to only include letters
+		cleaned := nonLetterRegex.ReplaceAllString(strings.ToLower(word), "")
+		if len(cleaned) > 1 && isPalindrome(cleaned) {
+			palindromes = append(palindromes, word)
+		}
+	}
+
+	if len(palindromes) > 0 {
+		results = append(results, fmt.Sprintf("Contains %d palindromes: %s", len(palindromes), strings.Join(palindromes, ", ")))
+	}
+
+	return results
+}
+
+func isPalindrome(s string) bool {
+	for i := 0; i < len(s)/2; i++ {
+		if s[i] != s[len(s)-1-i] {
+			return false
+		}
+	}
+	return true
+}
+
 func analysePrimes(checker *SpellChecker, input string) []string {
 	var results []string
 
@@ -248,6 +278,7 @@ var analysers = []analyser{
 	analyseDistribution,
 	analyseRunLengthEncoding,
 	analyseWordCount,
+	analysePalindromes,
 }
 
 // Analyse performs various forms of text analysis on the input and returns findings.
