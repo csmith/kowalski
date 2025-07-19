@@ -187,7 +187,7 @@ func analyseWordCount(_ *SpellChecker, input string) []string {
 
 	if strings.Contains(input, " ") {
 		words := strings.Fields(input)
-		results = append(results, fmt.Sprintf("%d words", len(words)))
+		results = append(results, fmt.Sprintf("%d words long", len(words)))
 	}
 
 	return results
@@ -197,18 +197,34 @@ func analysePalindromes(_ *SpellChecker, input string) []string {
 	var results []string
 
 	words := strings.Fields(input)
-	var palindromes []string
+	var singleWordPalindromes []string
+	var multiWordPalindromes []string
 
+	// Check single words
 	for _, word := range words {
-		// Clean the word to only include letters
 		cleaned := nonLetterRegex.ReplaceAllString(strings.ToLower(word), "")
 		if len(cleaned) > 1 && isPalindrome(cleaned) {
-			palindromes = append(palindromes, word)
+			singleWordPalindromes = append(singleWordPalindromes, cleaned)
 		}
 	}
 
-	if len(palindromes) > 0 {
-		results = append(results, fmt.Sprintf("Contains %d palindromes: %s", len(palindromes), strings.Join(palindromes, ", ")))
+	// Check all combinations of consecutive words
+	for start := 0; start < len(words); start++ {
+		for end := start + 2; end <= len(words); end++ {
+			phrase := strings.Join(words[start:end], " ")
+			cleaned := nonLetterRegex.ReplaceAllString(strings.ToLower(phrase), "")
+			if len(cleaned) > 1 && isPalindrome(cleaned) {
+				multiWordPalindromes = append(multiWordPalindromes, phrase)
+			}
+		}
+	}
+
+	if len(singleWordPalindromes) > 0 {
+		results = append(results, fmt.Sprintf("Contains %d single-word palindromes: %s", len(singleWordPalindromes), strings.Join(singleWordPalindromes, ", ")))
+	}
+
+	if len(multiWordPalindromes) > 0 {
+		results = append(results, fmt.Sprintf("Contains %d multi-word palindromes: %s", len(multiWordPalindromes), strings.Join(multiWordPalindromes, ", ")))
 	}
 
 	return results
