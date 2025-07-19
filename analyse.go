@@ -182,6 +182,17 @@ func analyseRunLengthEncoding(_ *SpellChecker, input string) []string {
 	return results
 }
 
+func analyseWordCount(_ *SpellChecker, input string) []string {
+	var results []string
+
+	if strings.Contains(input, " ") {
+		words := strings.Fields(input)
+		results = append(results, fmt.Sprintf("%d words", len(words)))
+	}
+
+	return results
+}
+
 func analysePrimes(checker *SpellChecker, input string) []string {
 	var results []string
 
@@ -236,6 +247,7 @@ var analysers = []analyser{
 	analyseLength,
 	analyseDistribution,
 	analyseRunLengthEncoding,
+	analyseWordCount,
 }
 
 // Analyse performs various forms of text analysis on the input and returns findings.
