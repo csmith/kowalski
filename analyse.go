@@ -208,9 +208,14 @@ func analysePalindromes(_ *SpellChecker, input string) []string {
 		}
 	}
 
-	// Check all combinations of consecutive words
+	// Check all combinations of consecutive words (limit to 10 word spans)
+	maxSpan := 10
 	for start := 0; start < len(words); start++ {
-		for end := start + 2; end <= len(words); end++ {
+		endLimit := start + maxSpan + 1
+		if endLimit > len(words) {
+			endLimit = len(words)
+		}
+		for end := start + 2; end <= endLimit; end++ {
 			phrase := strings.Join(words[start:end], " ")
 			cleaned := nonLetterRegex.ReplaceAllString(strings.ToLower(phrase), "")
 			if len(cleaned) > 1 && isPalindrome(cleaned) {
