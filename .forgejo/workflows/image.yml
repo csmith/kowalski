@@ -1,0 +1,30 @@
+name: build image
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-web:
+    uses: meta/workflows/.forgejo/workflows/image-build.yml@master
+    runs-on: docker
+    secrets: inherit
+    with:
+      image: public/kowalski/web
+      dockerfile: web.Dockerfile
+      github: csmith/kowalski/web
+
+  build-discord:
+    uses: meta/workflows/.forgejo/workflows/image-build.yml@master
+    runs-on: docker
+    secrets: inherit
+    with:
+      image: public/kowalski/discord
+      dockerfile: discord.Dockerfile
+      github: csmith/kowalski/discord

@@ -1,0 +1,20 @@
+name: check container build
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-web:
+    uses: meta/workflows/.forgejo/workflows/image-test.yml@master
+    runs-on: docker
+    with:
+      dockerfile: web.Dockerfile
+
+  build-discord:
+    uses: meta/workflows/.forgejo/workflows/image-test.yml@master
+    runs-on: docker
+    with:
+      dockerfile: discord.Dockerfile
