@@ -1,6 +1,6 @@
 module github.com/csmith/kowalski/v6
 
-go 1.24.3
+go 1.25.0
 
 require (
 	github.com/bits-and-blooms/bloom/v3 v3.7.1
@@ -8,7 +8,7 @@ require (
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/csmith/cryptography v1.1.0
 	golang.org/x/exp v0.0.0-20250531010427-b6e5de432a8b
-	golang.org/x/image v0.36.0
+	golang.org/x/image v0.37.0
 )
 
 require (
