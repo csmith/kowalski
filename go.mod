@@ -7,7 +7,7 @@ require (
 	github.com/blevesearch/vellum v1.2.0
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/csmith/cryptography v1.1.0
-	golang.org/x/exp v0.0.0-20250531010427-b6e5de432a8b
+	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90
 	golang.org/x/image v0.37.0
 )
 
