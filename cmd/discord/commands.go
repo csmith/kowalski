@@ -129,7 +129,7 @@ func Colours(_ string, urls []string, r Replier) {
 		}
 	}
 	text.WriteString("```")
-	r.reply(text.String())
+	r.reply("%s", text.String())
 }
 
 func init() {
@@ -186,7 +186,7 @@ func Letters(input string, r Replier) {
 		message.WriteString(fmt.Sprintf(" %d\n", res[i]))
 	}
 	message.WriteString("```")
-	r.reply(message.String())
+	r.reply("%s", message.String())
 }
 
 func init() {
@@ -334,7 +334,7 @@ func Shift(input string, r Replier) {
 		}
 		out.WriteString(fmt.Sprintf("\t%2d: %s (%.5f)\n", i, s, score))
 	}
-	r.reply(out.String())
+	r.reply("%s", out.String())
 }
 
 func init() {
@@ -419,7 +419,7 @@ func CheckWords(input string, r Replier) {
 	}
 
 	output.WriteString("\n\n**bold** = primary dict, _italic_ = backup dict only")
-	r.reply(output.String())
+	r.reply("%s", output.String())
 }
 
 func init() {
