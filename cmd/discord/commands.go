@@ -3,11 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
+	"log/slog"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"code.dny.dev/ssrf"
 	"github.com/bwmarrin/discordgo"
 	"github.com/csmith/cryptography"
 	"github.com/csmith/kowalski/v6"
@@ -103,15 +107,47 @@ func init() {
 	addCommand(textCommands, Chunk, "Splits the text into chunks of a given size", "chunk")
 }
 
-func Colours(_ string, urls []string, r Replier) {
-	res, err := http.Get(urls[0])
+const maxImageSize = 10 << 20
+
+var imageClient = newImageClient(ssrf.New(ssrf.WithAnyPort()))
+
+// newImageClient checks addresses as they're dialled, so the check also covers redirects and whatever a hostname
+// resolves to. A proxy would do the dialling itself and bypass the check, so the transport doesn't use one.
+func newImageClient(guardian *ssrf.Guardian) *http.Client {
+	return &http.Client{
+		Timeout: 30 * time.Second,
+		Transport: &http.Transport{
+			DialContext: (&net.Dialer{
+				Timeout: 10 * time.Second,
+				Control: guardian.Safe,
+			}).DialContext,
+			TLSHandshakeTimeout: 10 * time.Second,
+		},
+	}
+}
+
+func fetchImage(url string, r Replier) (io.ReadCloser, bool) {
+	res, err := imageClient.Get(url)
 	if err != nil {
-		r.reply("Unable to download image: %v", err)
+		slog.Warn("Unable to download image", "url", url, "error", err)
+		r.reply("Unable to download image")
+		return nil, false
+	}
+
+	return struct {
+		io.Reader
+		io.Closer
+	}{io.LimitReader(res.Body, maxImageSize), res.Body}, true
+}
+
+func Colours(_ string, urls []string, r Replier) {
+	image, ok := fetchImage(urls[0], r)
+	if !ok {
 		return
 	}
 
-	defer res.Body.Close()
-	colours, err := kowalski.ExtractColours(res.Body)
+	defer image.Close()
+	colours, err := kowalski.ExtractColours(image)
 	if err != nil {
 		r.reply("Unable to decode image: %v", err)
 		return
@@ -141,14 +177,13 @@ func init() {
 }
 
 func HiddenPixels(_ string, urls []string, r Replier) {
-	res, err := http.Get(urls[0])
-	if err != nil {
-		r.reply("Unable to download image: %v", err)
+	image, ok := fetchImage(urls[0], r)
+	if !ok {
 		return
 	}
 
-	defer res.Body.Close()
-	output, err := kowalski.HiddenPixels(res.Body)
+	defer image.Close()
+	output, err := kowalski.HiddenPixels(image)
 	if err != nil {
 		r.reply("Unable to decode image: %v", err)
 		return
@@ -291,14 +326,13 @@ func init() {
 }
 
 func RGB(_ string, urls []string, r Replier) {
-	res, err := http.Get(urls[0])
-	if err != nil {
-		r.reply("Unable to download image: %v", err)
+	image, ok := fetchImage(urls[0], r)
+	if !ok {
 		return
 	}
 
-	defer res.Body.Close()
-	red, green, blue, err := kowalski.SplitRGB(res.Body)
+	defer image.Close()
+	red, green, blue, err := kowalski.SplitRGB(image)
 	if err != nil {
 		r.reply("Unable to split image: %v", err)
 		return

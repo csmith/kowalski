@@ -3,6 +3,7 @@ module github.com/csmith/kowalski/v6
 go 1.26.0
 
 require (
+	code.dny.dev/ssrf v0.3.0
 	github.com/bits-and-blooms/bloom/v3 v3.7.1
 	github.com/blevesearch/vellum v1.2.0
 	github.com/bwmarrin/discordgo v0.29.0

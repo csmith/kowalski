@@ -126,6 +126,10 @@ This repository also contains a Discord bot in `cmd/discord` that allows users
 to perform analysis. It needs a bot token, passed with `-token` or `TOKEN`, and
 exits with an error if there isn't one.
 
+Commands that work on images take an attachment, an embed or a link. Images are
+only downloaded from public addresses, not loopback, private or link-local ones,
+and are limited to 10MiB and 30 seconds.
+
 It currently supports these commands:
 
 ```
