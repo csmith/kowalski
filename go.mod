@@ -8,6 +8,7 @@ require (
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/csmith/cryptography v1.1.0
 	github.com/csmith/envflag/v2 v2.0.0
+	github.com/stretchr/testify v1.12.1
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
 	golang.org/x/image v0.47.0
 )
@@ -16,6 +17,7 @@ require (
 	github.com/bits-and-blooms/bitset v1.24.2 // indirect
 	github.com/blevesearch/mmap-go v1.2.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 )

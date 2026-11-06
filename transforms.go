@@ -1,26 +1,33 @@
 package kowalski
 
 import (
+	"slices"
 	"strings"
 	"unicode"
 )
 
 // Chunk takes the input, and splits it up into chunks of the given length. If the input is longer than the list of
-// part lengths, the lengths will be repeated.
+// part lengths, the lengths will be repeated. Lengths of zero or less are ignored; if that leaves no lengths then the
+// input is returned as a single chunk.
 func Chunk(input string, parts ...int) []string {
+	sizes := slices.DeleteFunc(slices.Clone(parts), func(size int) bool { return size <= 0 })
+	if len(sizes) == 0 {
+		sizes = []int{len(input)}
+	}
+
 	var res []string
 	remaining := input
 	p := 0
 	for len(remaining) > 0 {
-		if len(remaining) >= parts[p] {
-			res = append(res, remaining[0:parts[p]])
-			remaining = remaining[parts[p]:]
+		if len(remaining) >= sizes[p] {
+			res = append(res, remaining[0:sizes[p]])
+			remaining = remaining[sizes[p]:]
 		} else {
 			res = append(res, remaining)
 			remaining = ""
 		}
 
-		p = (p + 1) % len(parts)
+		p = (p + 1) % len(sizes)
 	}
 	return res
 }

@@ -79,11 +79,15 @@ func Chunk(input string, r Replier) {
 	var parts []int
 	words := strings.Split(input, " ")
 	for i := range words {
-		if v, err := strconv.Atoi(words[i]); err == nil {
-			parts = append(parts, v)
-		} else {
+		v, err := strconv.Atoi(words[i])
+		if err != nil {
 			break
 		}
+		if v <= 0 {
+			r.reply("Chunk sizes must be greater than zero")
+			return
+		}
+		parts = append(parts, v)
 	}
 
 	if len(parts) == 0 {

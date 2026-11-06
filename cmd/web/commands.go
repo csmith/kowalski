@@ -48,11 +48,14 @@ func processChunk(input string) (interface{}, error) {
 	var parts []int
 	words := strings.Split(input, " ")
 	for i := range words {
-		if v, err := strconv.Atoi(words[i]); err == nil {
-			parts = append(parts, v)
-		} else {
+		v, err := strconv.Atoi(words[i])
+		if err != nil {
 			break
 		}
+		if v <= 0 {
+			return nil, fmt.Errorf("chunk sizes must be greater than zero")
+		}
+		parts = append(parts, v)
 	}
 
 	if len(parts) == 0 {
