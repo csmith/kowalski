@@ -17,17 +17,21 @@ var fstModel = flag.String("fst-model", "", "Path to FST for fast word operation
 
 var transducer *vellum.FST
 
-func init() {
-	flag.Parse()
-
-	if *fstModel != "" {
-		var err error
-
-		transducer, err = vellum.Open(*fstModel)
-		if err != nil {
-			panic(err)
-		}
+func initFST() {
+	if *fstModel == "" {
+		return
 	}
+
+	var err error
+	transducer, err = vellum.Open(*fstModel)
+	if err != nil {
+		panic(err)
+	}
+
+	addCommand(textCommands, FstAnagram, "Attempts to find anagrams from wikipedia, expanding '\\*' wildcards", "fstanagram", "fstagram")
+	addCommand(textCommands, FstRegex, "Attempts to find word matches from wikipedia using regexp", "fstregex", "fstre")
+	addCommand(textCommands, FstMorse, "Attempts to find word matches from wikipedia using morse", "fstmorse")
+	addCommand(textCommands, WordLink, "Attempts to find a word that links two others", "wordlink", "link")
 }
 
 func FstAnagram(input string, r Replier) {
@@ -40,12 +44,6 @@ func FstAnagram(input string, r Replier) {
 	fstQuery(automaton, input, r)
 }
 
-func init() {
-	if *fstModel != "" {
-		addCommand(textCommands, FstAnagram, "Attempts to find anagrams from wikipedia, expanding '\\*' wildcards", "fstanagram", "fstagram")
-	}
-}
-
 func FstRegex(input string, r Replier) {
 	automaton, err := regexp.New(input)
 	if err != nil {
@@ -56,20 +54,8 @@ func FstRegex(input string, r Replier) {
 	fstQuery(automaton, input, r)
 }
 
-func init() {
-	if *fstModel != "" {
-		addCommand(textCommands, FstRegex, "Attempts to find word matches from wikipedia using regexp", "fstregex", "fstre")
-	}
-}
-
 func FstMorse(input string, r Replier) {
 	fstQuery(fst.NewMorseAutomaton(input), input, r)
-}
-
-func init() {
-	if *fstModel != "" {
-		addCommand(textCommands, FstMorse, "Attempts to find word matches from wikipedia using morse", "fstmorse")
-	}
 }
 
 func WordLink(input string, r Replier) {
@@ -169,12 +155,6 @@ func WordLink(input string, r Replier) {
 	}
 
 	r.reply("%s", message.String())
-}
-
-func init() {
-	if *fstModel != "" {
-		addCommand(textCommands, WordLink, "Attempts to find a word that links two others", "wordlink", "link")
-	}
 }
 
 type fstMatch struct {

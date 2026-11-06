@@ -80,6 +80,10 @@ the serialised model:
 go run cmd/compile -in wordlist.txt -out model.wl
 ```
 
+Each flag of the commands in `cmd` can also be set with an environment variable
+named after it, e.g. `-out` as `OUT` or `-good-model` as `GOOD_MODEL`. A flag
+takes precedence over its variable, and `-h` shows the names.
+
 ### Vellum
 
 The `fst` package contains automata for use with the [Vellum](https://github.com/blevesearch/vellum/)
@@ -119,7 +123,8 @@ func create() {
 ## Discord bot
 
 This repository also contains a Discord bot in `cmd/discord` that allows users
-to perform analysis.
+to perform analysis. It needs a bot token, passed with `-token` or `TOKEN`, and
+exits with an error if there isn't one.
 
 It currently supports these commands:
 

@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/csmith/envflag/v2"
 	"github.com/csmith/kowalski/v6"
 )
 
@@ -41,11 +42,9 @@ type Response struct {
 	Error   string      `json:"error,omitempty"`
 }
 
-func init() {
-	flag.Parse()
-}
-
 func main() {
+	envflag.Parse()
+
 	checkers = []*kowalski.SpellChecker{
 		loadModel(*goodModel),
 		loadModel(*backupModel),

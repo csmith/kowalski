@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
+	"github.com/csmith/envflag/v2"
 	"github.com/csmith/kowalski/v6"
 	"io"
 	"io/ioutil"
@@ -16,7 +17,7 @@ var (
 )
 
 func main() {
-	flag.Parse()
+	envflag.Parse()
 
 	var input io.Reader
 	if *inFile == "-" {

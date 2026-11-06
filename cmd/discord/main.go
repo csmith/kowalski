@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"sort"
@@ -11,6 +12,7 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/csmith/envflag/v2"
 	"github.com/csmith/kowalski/v6"
 )
 
@@ -23,11 +25,16 @@ var (
 	checkers []*kowalski.SpellChecker
 )
 
-func init() {
-	flag.Parse()
-}
-
 func main() {
+	envflag.Parse()
+
+	if *token == "" {
+		slog.Error("No Discord token set: use the -token flag or TOKEN environment variable")
+		os.Exit(1)
+	}
+
+	initFST()
+
 	checkers = []*kowalski.SpellChecker{
 		loadModel(*goodModel),
 		loadModel(*backupModel),
