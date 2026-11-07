@@ -90,7 +90,7 @@ func WordLink(input string, r Replier) {
 	if err != nil {
 		r.reply("Error: %s", err.Error())
 		return
-	} else if len(leftSide) == 0 {
+	} else if len(rightSide) == 0 {
 		r.reply("No words found that can precede '%s'", parts[1])
 		return
 	}
