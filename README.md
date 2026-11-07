@@ -82,7 +82,8 @@ go run cmd/compile -in wordlist.txt -out model.wl
 
 Each flag of the commands in `cmd` can also be set with an environment variable
 named after it, e.g. `-out` as `OUT` or `-good-model` as `GOOD_MODEL`. A flag
-takes precedence over its variable, and `-h` shows the names.
+takes precedence over its variable, and `-h` shows the names. Logging is
+configured with `-log.level` (`LOG_LEVEL`) and `-log.format` (`LOG_FORMAT`).
 
 ### Vellum
 

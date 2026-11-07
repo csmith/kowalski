@@ -14,6 +14,8 @@ github.com/csmith/cryptography v1.1.0 h1:ZO3w3A27vXKXrFr6gebr4ZNZvUy671pmpk0pz4Y
 github.com/csmith/cryptography v1.1.0/go.mod h1:gxgxyQDaeurHFCAGwj0y0KCOLZ19Aecs5msWPu1jKrk=
 github.com/csmith/envflag/v2 v2.0.0 h1:jho28W/psEqJ02EdbUHmkmFpbc5HFhog6NzHRbgtIFg=
 github.com/csmith/envflag/v2 v2.0.0/go.mod h1:GNzzXvZ2bC3z6tdoO45mTrs7l4Uht2WfBKaF1KQu0Pk=
+github.com/csmith/slogflags v1.2.0 h1:NhDhmnZGI2qab9acWsXvaRin/YsQJB+JtyANKvIxEzw=
+github.com/csmith/slogflags v1.2.0/go.mod h1:bauVbR8CshU26FTB8K7XYqnkIV6iUKOxkNP76IdZkqk=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=

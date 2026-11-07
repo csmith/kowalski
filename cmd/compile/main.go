@@ -3,12 +3,14 @@ package main
 import (
 	"bytes"
 	"flag"
-	"github.com/csmith/envflag/v2"
-	"github.com/csmith/kowalski/v6"
 	"io"
 	"io/ioutil"
-	"log"
+	"log/slog"
 	"os"
+
+	"github.com/csmith/envflag/v2"
+	"github.com/csmith/kowalski/v6"
+	"github.com/csmith/slogflags"
 )
 
 var (
@@ -18,6 +20,7 @@ var (
 
 func main() {
 	envflag.Parse()
+	_ = slogflags.Logger(slogflags.WithSetDefault(true))
 
 	var input io.Reader
 	if *inFile == "-" {
@@ -25,7 +28,8 @@ func main() {
 	} else {
 		f, err := os.Open(*inFile)
 		if err != nil {
-			log.Fatalf("Unable to open input: %v", err)
+			slog.Error("Unable to open input", "error", err)
+			os.Exit(1)
 		}
 		defer f.Close()
 		input = f
@@ -33,7 +37,8 @@ func main() {
 
 	b, err := ioutil.ReadAll(input)
 	if err != nil {
-		log.Fatalf("Unable to read input: %v", err)
+		slog.Error("Unable to read input", "error", err)
+		os.Exit(1)
 	}
 
 	count := bytes.Count(b, []byte{'\n'})
@@ -41,19 +46,22 @@ func main() {
 
 	checker, err := kowalski.CreateSpellChecker(reader, count)
 	if err != nil {
-		log.Fatalf("Unable to create checker: %v", err)
+		slog.Error("Unable to create checker", "error", err)
+		os.Exit(1)
 	}
 
 	out, err := os.Create(*outFile)
 	if err != nil {
-		log.Fatalf("Unable to open output: %v", err)
+		slog.Error("Unable to open output", "error", err)
+		os.Exit(1)
 	}
 	defer out.Close()
 
 	err = kowalski.SaveSpellChecker(out, checker)
 	if err != nil {
-		log.Fatalf("Unable to save checker: %v", err)
+		slog.Error("Unable to save checker", "error", err)
+		os.Exit(1)
 	}
 
-	log.Printf("Spell checker with ~%d words successfully saved to %s", count, *outFile)
+	slog.Info("Spell checker successfully saved", "words", count, "path", *outFile)
 }

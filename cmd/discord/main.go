@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -14,6 +13,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/csmith/envflag/v2"
 	"github.com/csmith/kowalski/v6"
+	"github.com/csmith/slogflags"
 )
 
 var (
@@ -27,6 +27,7 @@ var (
 
 func main() {
 	envflag.Parse()
+	_ = slogflags.Logger(slogflags.WithSetDefault(true))
 
 	if *token == "" {
 		slog.Error("No Discord token set: use the -token flag or TOKEN environment variable")
@@ -42,19 +43,19 @@ func main() {
 
 	dg, err := discordgo.New(fmt.Sprintf("Bot %s", *token))
 	if err != nil {
-		fmt.Println("error creating Discord session,", err)
+		slog.Error("Unable to create Discord session", "error", err)
 		return
 	}
 
 	dg.AddHandler(handleMessage)
 
 	if err := dg.Open(); err != nil {
-		fmt.Println("error opening connection,", err)
+		slog.Error("Unable to open Discord connection", "error", err)
 		return
 	}
 
 	// Wait here until CTRL-C or other term signal is received.
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	slog.Info("Bot is now running. Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
@@ -66,13 +67,15 @@ func main() {
 func loadModel(path string) (res *kowalski.SpellChecker) {
 	f, err := os.Open(path)
 	if err != nil {
-		log.Panicf("Failed to open model: %v", err)
+		slog.Error("Failed to open model", "path", path, "error", err)
+		panic(err)
 	}
 	defer f.Close()
 
 	res, err = kowalski.LoadSpellChecker(f)
 	if err != nil {
-		log.Panicf("Failed to load model: %v", err)
+		slog.Error("Failed to load model", "path", path, "error", err)
+		panic(err)
 	}
 	return res
 }
@@ -239,6 +242,6 @@ func (d *DiscordReplier) replyWithFiles(files []*discordgo.File, format string, 
 		Reference: d.reference,
 	})
 	if err != nil {
-		log.Printf("Unable to send message: %v", err)
+		slog.Error("Unable to send message", "error", err)
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,6 +17,7 @@ import (
 
 	"github.com/csmith/envflag/v2"
 	"github.com/csmith/kowalski/v6"
+	"github.com/csmith/slogflags"
 )
 
 //go:embed static/*
@@ -44,6 +45,7 @@ type Response struct {
 
 func main() {
 	envflag.Parse()
+	_ = slogflags.Logger(slogflags.WithSetDefault(true))
 
 	checkers = []*kowalski.SpellChecker{
 		loadModel(*goodModel),
@@ -57,7 +59,8 @@ func main() {
 	// Create a sub-filesystem that strips the "static" prefix
 	staticFS, err := fs.Sub(staticFiles, "static")
 	if err != nil {
-		log.Fatalf("Failed to create static filesystem: %v", err)
+		slog.Error("Failed to create static filesystem", "error", err)
+		os.Exit(1)
 	}
 
 	mux := http.NewServeMux()
@@ -71,9 +74,10 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("Starting web server on port %d", *port)
+		slog.Info("Starting web server", "port", *port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Listen error: %v", err)
+			slog.Error("Listen error", "error", err)
+			os.Exit(1)
 		}
 	}()
 
@@ -81,26 +85,29 @@ func main() {
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-stop
 
-	log.Println("Shutting down server...")
+	slog.Info("Shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("Server shutdown error: %v", err)
+		slog.Error("Server shutdown error", "error", err)
+		os.Exit(1)
 	}
-	log.Println("Server stopped")
+	slog.Info("Server stopped")
 }
 
 func loadModel(path string) *kowalski.SpellChecker {
 	f, err := os.Open(path)
 	if err != nil {
-		log.Panicf("Failed to open model: %v", err)
+		slog.Error("Failed to open model", "path", path, "error", err)
+		panic(err)
 	}
 	defer f.Close()
 
 	res, err := kowalski.LoadSpellChecker(f)
 	if err != nil {
-		log.Panicf("Failed to load model: %v", err)
+		slog.Error("Failed to load model", "path", path, "error", err)
+		panic(err)
 	}
 	return res
 }

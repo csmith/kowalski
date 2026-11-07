@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"regexp"
 	"sort"
 	"strings"
@@ -19,7 +19,7 @@ func initFST(path string) {
 	var err error
 	fstTransducer, err = vellum.Open(path)
 	if err != nil {
-		log.Printf("Failed to open FST model: %v", err)
+		slog.Error("Failed to open FST model", "path", path, "error", err)
 	}
 }
 
