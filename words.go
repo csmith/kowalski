@@ -52,6 +52,7 @@ func wordSearchLines(input []string) []string {
 		return res
 	}
 
+	input = padLines(input)
 	width := len(input[0])
 	longestSide := max(len(input), width)
 
@@ -95,5 +96,19 @@ func wordSearchLines(input []string) []string {
 		}
 	}
 
+	return res
+}
+
+// padLines pads every line with spaces to the length of the longest, so the grid can be indexed safely.
+func padLines(input []string) []string {
+	width := 0
+	for i := range input {
+		width = max(width, len(input[i]))
+	}
+
+	res := make([]string, len(input))
+	for i := range input {
+		res[i] = input[i] + strings.Repeat(" ", width-len(input[i]))
+	}
 	return res
 }

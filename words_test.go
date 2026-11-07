@@ -45,6 +45,32 @@ func TestWordSearchLines(t *testing.T) {
 				"48", "159", "26",
 			},
 		},
+		{
+			"short last line",
+			[]string{"abc", "de"},
+			[]string{
+				// Horizontal
+				"abc", "de ",
+				// Vertical
+				"ad", "be", "c ",
+				// Diagonals
+				"db", "ec",
+				"b ", "ae",
+			},
+		},
+		{
+			"short first line",
+			[]string{"12", "345"},
+			[]string{
+				// Horizontal
+				"12 ", "345",
+				// Vertical
+				"13", "24", " 5",
+				// Diagonals
+				"32", "4 ",
+				"25", "14",
+			},
+		},
 	}
 
 	for _, tt := range tests {
