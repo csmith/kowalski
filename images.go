@@ -73,15 +73,18 @@ func HiddenPixels(reader io.Reader) (io.Reader, error) {
 			diff((c1>>16)&0xff, (c2>>16)&0xff) <= 10
 	}
 
-	pair := func(c1, c2 uint32) uint32 {
-		if c1 < c2 {
-			return (c1 << 24) | c2
-		} else {
-			return (c2 << 24) | c1
-		}
+	type colourPair struct {
+		low, high uint32
 	}
 
-	pairs := make(map[uint32]int)
+	pair := func(c1, c2 uint32) colourPair {
+		if c1 < c2 {
+			return colourPair{c1, c2}
+		}
+		return colourPair{c2, c1}
+	}
+
+	pairs := make(map[colourPair]int)
 	b := im.Bounds()
 	for y := b.Min.Y; y < b.Max.Y; y++ {
 		for x := b.Min.X; x < b.Max.X; x++ {
@@ -112,11 +115,11 @@ func HiddenPixels(reader io.Reader) (io.Reader, error) {
 	}
 	replacements := make(map[uint32]color.RGBA)
 	nextColour := 0
-	for i := range pairs {
-		if pairs[i] > 100 {
-			replacements[i&0xffffff] = colours[nextColour]
+	for p, count := range pairs {
+		if count > 100 {
+			replacements[p.high] = colours[nextColour]
 			nextColour = (nextColour + 1) % len(colours)
-			replacements[(i>>24)&0xffffff] = colours[nextColour]
+			replacements[p.low] = colours[nextColour]
 			nextColour = (nextColour + 1) % len(colours)
 		}
 	}
