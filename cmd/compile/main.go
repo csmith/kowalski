@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"flag"
 	"io"
-	"io/ioutil"
 	"log/slog"
 	"os"
 
@@ -35,7 +34,7 @@ func main() {
 		input = f
 	}
 
-	b, err := ioutil.ReadAll(input)
+	b, err := io.ReadAll(input)
 	if err != nil {
 		slog.Error("Unable to read input", "error", err)
 		os.Exit(1)

@@ -2,10 +2,9 @@ package kowalski
 
 import (
 	"context"
+	"slices"
 	"sort"
 	"strings"
-
-	"golang.org/x/exp/slices"
 )
 
 // Anagram finds all single-word anagrams of the given word, expanding '?' as a single wildcard character

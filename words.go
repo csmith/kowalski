@@ -112,3 +112,14 @@ func padLines(input []string) []string {
 	}
 	return res
 }
+
+func reverse(input []byte, start int) []byte {
+	for left, right := start, len(input)-1; left < right; left, right = left+1, right-1 {
+		input[left], input[right] = input[right], input[left]
+	}
+	return input
+}
+
+func reverseString(input string) string {
+	return string(reverse([]byte(input), 0))
+}
