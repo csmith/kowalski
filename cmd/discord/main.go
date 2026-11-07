@@ -44,14 +44,14 @@ func main() {
 	dg, err := discordgo.New(fmt.Sprintf("Bot %s", *token))
 	if err != nil {
 		slog.Error("Unable to create Discord session", "error", err)
-		return
+		os.Exit(1)
 	}
 
 	dg.AddHandler(handleMessage)
 
 	if err := dg.Open(); err != nil {
 		slog.Error("Unable to open Discord connection", "error", err)
-		return
+		os.Exit(1)
 	}
 
 	// Wait here until CTRL-C or other term signal is received.
