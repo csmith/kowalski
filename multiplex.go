@@ -19,126 +19,153 @@ func Dedupe(options *multiplexOptions) {
 
 // MultiplexMatch performs the Match operation over a number of different checkers.
 func MultiplexMatch(ctx context.Context, checkers []*SpellChecker, pattern string, opts ...MultiplexOption) ([][]string, error) {
-	return multiplexWithErrors(checkers, func(checker *SpellChecker) ([]string, error) {
-		return Match(ctx, checker, pattern)
-	}, opts)
+	return multiplexWords(
+		checkers,
+		func(checker *SpellChecker) ([]string, error) {
+			return Match(ctx, checker, pattern)
+		},
+		opts,
+	)
 }
 
 // MultiplexMultiMatch performs the MultiMatch operation over a number of different checkers.
 func MultiplexMultiMatch(ctx context.Context, checkers []*SpellChecker, pattern string, opts ...MultiplexOption) ([][]string, error) {
-	return multiplexWithErrors(checkers, func(checker *SpellChecker) ([]string, error) {
-		return MultiMatch(ctx, checker, pattern)
-	}, opts)
+	return multiplexWords(
+		checkers,
+		func(checker *SpellChecker) ([]string, error) {
+			return MultiMatch(ctx, checker, pattern)
+		},
+		opts,
+	)
 }
 
 // MultiplexAnagram performs the Anagram operation over a number of different checkers.
 func MultiplexAnagram(ctx context.Context, checkers []*SpellChecker, pattern string, opts ...MultiplexOption) ([][]string, error) {
-	return multiplexWithErrors(checkers, func(checker *SpellChecker) ([]string, error) {
-		return Anagram(ctx, checker, pattern)
-	}, opts)
+	return multiplexWords(
+		checkers,
+		func(checker *SpellChecker) ([]string, error) {
+			return Anagram(ctx, checker, pattern)
+		},
+		opts,
+	)
 }
 
 // MultiplexMultiAnagram performs the MultiAnagram operation over a number of different checkers.
 func MultiplexMultiAnagram(ctx context.Context, checkers []*SpellChecker, pattern string, opts ...MultiplexOption) ([][]string, error) {
-	return multiplexWithErrors(checkers, func(checker *SpellChecker) ([]string, error) {
-		return MultiAnagram(ctx, checker, pattern)
-	}, opts)
+	return multiplexWords(
+		checkers,
+		func(checker *SpellChecker) ([]string, error) {
+			return MultiAnagram(ctx, checker, pattern)
+		},
+		opts,
+	)
 }
 
 // MultiplexFindWords performs the FindWords operation over a number of different checkers.
 func MultiplexFindWords(checkers []*SpellChecker, pattern string, opts ...MultiplexOption) [][]string {
-	return multiplex(checkers, func(checker *SpellChecker) []string {
-		return FindWords(checker, pattern)
-	}, opts)
+	res, _ := multiplexWords(
+		checkers,
+		func(checker *SpellChecker) ([]string, error) {
+			return FindWords(checker, pattern), nil
+		},
+		opts,
+	)
+	return res
 }
 
 // MultiplexFromMorse performs the FromMorse operation over a number of different checkers.
 func MultiplexFromMorse(checkers []*SpellChecker, pattern string, opts ...MultiplexOption) [][]string {
-	return multiplex(checkers, func(checker *SpellChecker) []string {
-		return FromMorse(checker, pattern)
-	}, opts)
+	res, _ := multiplexWords(
+		checkers,
+		func(checker *SpellChecker) ([]string, error) {
+			return FromMorse(checker, pattern), nil
+		},
+		opts,
+	)
+	return res
 }
 
 // MultiplexOffByOne performs the OffByOne operation over a number of different checkers.
 func MultiplexOffByOne(ctx context.Context, checkers []*SpellChecker, pattern string, opts ...MultiplexOption) ([][]string, error) {
-	return multiplexWithErrors(checkers, func(checker *SpellChecker) ([]string, error) {
-		return OffByOne(ctx, checker, pattern)
-	}, opts)
+	return multiplexWords(
+		checkers,
+		func(checker *SpellChecker) ([]string, error) {
+			return OffByOne(ctx, checker, pattern)
+		},
+		opts,
+	)
 }
 
 // MultiplexFromT9 performs the FromT9 operation over a number of different checkers.
 func MultiplexFromT9(checkers []*SpellChecker, pattern string, opts ...MultiplexOption) [][]string {
-	return multiplex(checkers, func(checker *SpellChecker) []string {
-		return FromT9(checker, pattern)
-	}, opts)
+	res, _ := multiplexWords(
+		checkers,
+		func(checker *SpellChecker) ([]string, error) {
+			return FromT9(checker, pattern), nil
+		},
+		opts,
+	)
+	return res
 }
 
 // MultiplexWordSearch performs the WordSearch operation over a number of different checkers.
 func MultiplexWordSearch(checkers []*SpellChecker, pattern []string, opts ...MultiplexOption) [][]string {
-	return multiplex(checkers, func(checker *SpellChecker) []string {
-		return WordSearch(checker, pattern)
-	}, opts)
+	res, _ := multiplexWords(
+		checkers,
+		func(checker *SpellChecker) ([]string, error) {
+			return WordSearch(checker, pattern), nil
+		},
+		opts,
+	)
+	return res
 }
 
 // MultiplexCheckWords performs the CheckWords operation over a number of different checkers.
 // Returns results for each checker separately.
 func MultiplexCheckWords(checkers []*SpellChecker, input string) [][][]WordCheckResult {
-	results := make([][][]WordCheckResult, len(checkers))
-	wg := &sync.WaitGroup{}
-
-	for i := range checkers {
-		wg.Add(1)
-		go func(i int) {
-			results[i] = CheckWords(checkers[i], input)
-			wg.Done()
-		}(i)
-	}
-
-	wg.Wait()
-	return results
-}
-
-func multiplex(checkers []*SpellChecker, f func(checker *SpellChecker) []string, opts []MultiplexOption) [][]string {
-	o := &multiplexOptions{}
-	for i := range opts {
-		opts[i](o)
-	}
-
-	res := make([][]string, len(checkers))
-	wg := &sync.WaitGroup{}
-
-	for i := range checkers {
-		wg.Add(1)
-		go func(i int) {
-			res[i] = f(checkers[i])
-			wg.Done()
-		}(i)
-	}
-
-	wg.Wait()
-
-	if o.dedupe {
-		return dedupe(res)
-	}
+	res, _ := multiplex(
+		checkers,
+		func(checker *SpellChecker) ([][]WordCheckResult, error) {
+			return CheckWords(checker, input), nil
+		},
+	)
 	return res
 }
 
-func multiplexWithErrors(checkers []*SpellChecker, f func(checker *SpellChecker) ([]string, error), opts []MultiplexOption) ([][]string, error) {
+func multiplexWords(
+	checkers []*SpellChecker,
+	f func(*SpellChecker) ([]string, error),
+	opts []MultiplexOption,
+) ([][]string, error) {
 	o := &multiplexOptions{}
 	for i := range opts {
 		opts[i](o)
 	}
 
-	res := make([][]string, len(checkers))
+	res, err := multiplex(checkers, f)
+	if err != nil {
+		return nil, err
+	}
+
+	if o.dedupe {
+		return dedupe(res), nil
+	}
+	return res, nil
+}
+
+// multiplex runs f against each checker concurrently, returning results in checker order. If any call fails, the
+// error from the earliest checker is returned and the results are discarded.
+func multiplex[T any](checkers []*SpellChecker, f func(*SpellChecker) (T, error)) ([]T, error) {
+	res := make([]T, len(checkers))
 	errs := make([]error, len(checkers))
 	wg := &sync.WaitGroup{}
 
 	for i := range checkers {
-		wg.Add(1)
-		go func(i int) {
-			res[i], errs[i] = f(checkers[i])
-			wg.Done()
-		}(i)
+		wg.Go(
+			func() {
+				res[i], errs[i] = f(checkers[i])
+			},
+		)
 	}
 
 	wg.Wait()
@@ -149,9 +176,6 @@ func multiplexWithErrors(checkers []*SpellChecker, f func(checker *SpellChecker)
 		}
 	}
 
-	if o.dedupe {
-		return dedupe(res), nil
-	}
 	return res, nil
 }
 
