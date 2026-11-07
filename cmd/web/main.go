@@ -170,7 +170,7 @@ func writeJSON(w http.ResponseWriter, v interface{}) {
 func processCommand(command, input string) (interface{}, error) {
 	switch command {
 	case "anagram":
-		return processAnagram(input)
+		return processMultiplex(kowalski.MultiplexAnagram, input)
 	case "analysis":
 		return processAnalysis(input)
 	case "chunk":
@@ -178,15 +178,15 @@ func processCommand(command, input string) (interface{}, error) {
 	case "letters":
 		return processLetters(input)
 	case "match":
-		return processMatch(input)
+		return processMultiplex(kowalski.MultiplexMatch, input)
 	case "morse":
 		return processMorse(input)
 	case "multianagram":
-		return processMultiAnagram(input)
+		return processMultiplex(kowalski.MultiplexMultiAnagram, input)
 	case "multimatch":
-		return processMultiMatch(input)
+		return processMultiplex(kowalski.MultiplexMultiMatch, input)
 	case "offbyone":
-		return processOffByOne(input)
+		return processMultiplex(kowalski.MultiplexOffByOne, input)
 	case "shift":
 		return processShift(input)
 	case "t9":

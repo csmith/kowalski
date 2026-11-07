@@ -14,7 +14,14 @@ import (
 	"github.com/csmith/kowalski/v6"
 )
 
-func processAnagram(input string) (interface{}, error) {
+type multiplexFunc func(
+	context.Context,
+	[]*kowalski.SpellChecker,
+	string,
+	...kowalski.MultiplexOption,
+) ([][]string, error)
+
+func processMultiplex(fn multiplexFunc, input string) (any, error) {
 	input = strings.ToLower(input)
 	if !isValidWord(input) {
 		return nil, fmt.Errorf("invalid word: %s", input)
@@ -23,12 +30,12 @@ func processAnagram(input string) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	words, err := kowalski.MultiplexAnagram(ctx, checkers, input, kowalski.Dedupe)
+	words, err := fn(ctx, checkers, input, kowalski.Dedupe)
 	if err != nil {
 		return nil, err
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"input":  input,
 		"result": merge(words),
 	}, nil
@@ -83,92 +90,12 @@ func processLetters(input string) (interface{}, error) {
 	}, nil
 }
 
-func processMatch(input string) (interface{}, error) {
-	input = strings.ToLower(input)
-	if !isValidWord(input) {
-		return nil, fmt.Errorf("invalid word: %s", input)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	words, err := kowalski.MultiplexMatch(ctx, checkers, input, kowalski.Dedupe)
-	if err != nil {
-		return nil, err
-	}
-
-	return map[string]interface{}{
-		"input":  input,
-		"result": merge(words),
-	}, nil
-}
-
 func processMorse(input string) (interface{}, error) {
 	res := merge(kowalski.MultiplexFromMorse(checkers, input, kowalski.Dedupe))
 
 	return map[string]interface{}{
 		"input":  input,
 		"result": res,
-	}, nil
-}
-
-func processMultiAnagram(input string) (interface{}, error) {
-	input = strings.ToLower(input)
-	if !isValidWord(input) {
-		return nil, fmt.Errorf("invalid word: %s", input)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	words, err := kowalski.MultiplexMultiAnagram(ctx, checkers, input, kowalski.Dedupe)
-	if err != nil {
-		return nil, err
-	}
-
-	return map[string]interface{}{
-		"input":  input,
-		"result": merge(words),
-	}, nil
-}
-
-func processMultiMatch(input string) (interface{}, error) {
-	input = strings.ToLower(input)
-	if !isValidWord(input) {
-		return nil, fmt.Errorf("invalid word: %s", input)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	words, err := kowalski.MultiplexMultiMatch(ctx, checkers, input, kowalski.Dedupe)
-	if err != nil {
-		return nil, err
-	}
-
-	return map[string]interface{}{
-		"input":  input,
-		"result": merge(words),
-	}, nil
-}
-
-func processOffByOne(input string) (interface{}, error) {
-	input = strings.ToLower(input)
-	if !isValidWord(input) {
-		return nil, fmt.Errorf("invalid word: %s", input)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	words, err := kowalski.MultiplexOffByOne(ctx, checkers, input, kowalski.Dedupe)
-	if err != nil {
-		return nil, err
-	}
-
-	return map[string]interface{}{
-		"input":  input,
-		"result": merge(words),
 	}, nil
 }
 
