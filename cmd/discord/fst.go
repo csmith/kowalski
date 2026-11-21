@@ -4,12 +4,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	regexp2 "regexp"
+	"regexp"
 	"sort"
 	"strings"
 
 	"github.com/blevesearch/vellum"
-	"github.com/blevesearch/vellum/regexp"
 	"github.com/csmith/kowalski/v6/fst"
 )
 
@@ -45,7 +44,7 @@ func FstAnagram(input string, r Replier) {
 }
 
 func FstRegex(input string, r Replier) {
-	automaton, err := regexp.New(input)
+	automaton, err := fst.NewRegexAutomaton(input)
 	if err != nil {
 		r.reply("Error: %s", err.Error())
 		return
@@ -66,7 +65,7 @@ func WordLink(input string, r Replier) {
 		return
 	}
 
-	leftAut, err := regexp.New(fmt.Sprintf("%s[ -]?([a-zA-Z]{3,})", regexp2.QuoteMeta(parts[0])))
+	leftAut, err := fst.NewRegexAutomaton(regexp.QuoteMeta(parts[0]) + "[ -]?([a-zA-Z]{3,})")
 	if err != nil {
 		r.reply("Error: %s", err.Error())
 		return
@@ -80,7 +79,7 @@ func WordLink(input string, r Replier) {
 		return
 	}
 
-	rightAut, err := regexp.New(fmt.Sprintf("([a-zA-Z]{3,})[ -]?%s", regexp2.QuoteMeta(parts[1])))
+	rightAut, err := fst.NewRegexAutomaton("([a-zA-Z]{3,})[ -]?" + regexp.QuoteMeta(parts[1]))
 	if err != nil {
 		r.reply("Error: %s", err.Error())
 		return

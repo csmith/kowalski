@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/blevesearch/vellum"
-	vellumRegexp "github.com/blevesearch/vellum/regexp"
 	"github.com/csmith/kowalski/v6/fst"
 )
 
@@ -46,7 +45,7 @@ func processFstAnagram(input string) (interface{}, error) {
 }
 
 func processFstRegex(input string) (interface{}, error) {
-	automaton, err := vellumRegexp.New(input)
+	automaton, err := fst.NewRegexAutomaton(input)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +81,7 @@ func processWordLink(input string) (interface{}, error) {
 		return nil, fmt.Errorf("invalid input, must specify two words to link")
 	}
 
-	leftAut, err := vellumRegexp.New(fmt.Sprintf("%s[ -]?([a-zA-Z]{3,})", regexp.QuoteMeta(parts[0])))
+	leftAut, err := fst.NewRegexAutomaton(regexp.QuoteMeta(parts[0]) + "[ -]?([a-zA-Z]{3,})")
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +92,7 @@ func processWordLink(input string) (interface{}, error) {
 		return nil, fmt.Errorf("no words found that can follow '%s'", parts[0])
 	}
 
-	rightAut, err := vellumRegexp.New(fmt.Sprintf("([a-zA-Z]{3,})[ -]?%s", regexp.QuoteMeta(parts[1])))
+	rightAut, err := fst.NewRegexAutomaton("([a-zA-Z]{3,})[ -]?" + regexp.QuoteMeta(parts[1]))
 	if err != nil {
 		return nil, err
 	}
