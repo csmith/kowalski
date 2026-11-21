@@ -5,22 +5,27 @@ import (
 )
 
 // FindWords attempts to find substrings of the input that are valid words according to the checker.
-// Duplicates may be present in the output if they occur at multiple positions.
+// Words are matched case-insensitively and returned in lower case. Duplicates may be present in the output if they
+// occur at multiple positions.
 func FindWords(checker *SpellChecker, input string) []string {
 	var res []string
 
-	findWords(checker, input, func(start, end int) {
-		res = append(res, input[start:end])
-	})
+	lower := strings.ToLower(input)
+	findWords(
+		checker,
+		lower,
+		func(start, end int) {
+			res = append(res, lower[start:end])
+		},
+	)
 
 	return res
 }
 
-// findWords finds all substrings of the given input, calling func with their start and end offsets.
-func findWords(checker *SpellChecker, input string, fn func(start, end int)) {
-	lower := strings.ToLower(input)
-	for i := 0; i < len(input); i++ {
-		for j := i + 1; j < len(input)+1 && checker.Prefix(lower[i:j]); j++ {
+// findWords finds all substrings of the given lowercase input, calling func with their start and end offsets.
+func findWords(checker *SpellChecker, lower string, fn func(start, end int)) {
+	for i := range len(lower) {
+		for j := i + 1; j < len(lower)+1 && checker.Prefix(lower[i:j]); j++ {
 			if checker.Valid(lower[i:j]) {
 				fn(i, j)
 			}

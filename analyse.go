@@ -327,6 +327,7 @@ func Score(checker *SpellChecker, input string) float64 {
 
 // scoreWord returns a score for the text based on how many english words occur within it.
 func scoreWord(checker *SpellChecker, input string) float64 {
+	input = strings.ToLower(input)
 	words := make([]int, len(input))
 	findWords(checker, input, func(start, end int) {
 		for i := start; i < end; i++ {

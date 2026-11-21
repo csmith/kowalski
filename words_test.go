@@ -15,6 +15,8 @@ func TestFindWords(t *testing.T) {
 		{"repeated words", "foofoofoo", []string{"foo", "foo", "foo"}},
 		{"offset", "xyzfooxyz", []string{"foo"}},
 		{"no words", "xyz", nil},
+		{"mixed case", "xFoOx", []string{"foo"}},
+		{"lowercasing shortens input", "\u212Afoo", []string{"foo"}},
 	}
 
 	for _, tt := range tests {

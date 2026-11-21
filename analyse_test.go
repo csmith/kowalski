@@ -18,3 +18,12 @@ func TestAnalyseRunLengthEncodingLargeCounts(t *testing.T) {
 		)
 	}
 }
+
+func TestScoreWithShorterLowercase(t *testing.T) {
+	assert.NotPanics(
+		t,
+		func() {
+			Score(testChecker, "foo \u212A\u0130bar")
+		},
+	)
+}
