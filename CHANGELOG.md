@@ -8,6 +8,7 @@
 - Fix wildcard multi-word searches and complex FST regexes using excessive memory or CPU; very broad multi-word patterns now return an error
 - Fix the Discord bot pinging everyone, roles or users mentioned in text it echoes back
 - Fix multi-word anagrams of three or more words repeating in different word orders
+- Fix the web server keeping slow or idle connections open indefinitely
 
 ## 6.0.3 - 2025-07-17
 

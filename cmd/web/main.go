@@ -13,8 +13,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
+	xhttp "chameth.com/x/http"
 	"github.com/csmith/envflag/v2"
 	"github.com/csmith/kowalski/v6"
 	"github.com/csmith/slogflags"
@@ -73,24 +73,12 @@ func main() {
 		Handler: mux,
 	}
 
-	go func() {
-		slog.Info("Starting web server", "port", *port)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			slog.Error("Listen error", "error", err)
-			os.Exit(1)
-		}
-	}()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	<-stop
-
-	slog.Info("Shutting down server...")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		slog.Error("Server shutdown error", "error", err)
+	slog.Info("Starting web server", "port", *port)
+	if err := xhttp.ListenAndServe(ctx, srv); err != nil {
+		slog.Error("Server error", "error", err)
 		os.Exit(1)
 	}
 	slog.Info("Server stopped")
