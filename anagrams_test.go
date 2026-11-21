@@ -53,6 +53,7 @@ func TestMultiAnagrams(t *testing.T) {
 		// And new multi-word behaviour should too
 		{"two words", "bfaozo", []string{"baz foo"}},
 		{"two words with wildcards", "bfao?o", []string{"bar foo", "baz foo"}},
+		{"three words", "barbazfoo", []string{"bar baz foo"}},
 	}
 
 	for _, tt := range tests {

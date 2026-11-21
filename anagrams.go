@@ -69,6 +69,7 @@ func onlyAscendingWords(input []string) []string {
 					valid = false
 					break
 				}
+				last = p
 			}
 			if valid {
 				filtered = append(filtered, input[i])
