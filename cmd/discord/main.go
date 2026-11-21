@@ -240,6 +240,8 @@ func (d *DiscordReplier) replyWithFiles(files []*discordgo.File, format string, 
 		Content:   text,
 		Files:     files,
 		Reference: d.reference,
+		// Replies often echo user text, so only notify the user being replied to.
+		AllowedMentions: &discordgo.MessageAllowedMentions{RepliedUser: true},
 	})
 	if err != nil {
 		slog.Error("Unable to send message", "error", err)
