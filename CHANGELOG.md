@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Bug fixes
+
+- Fix crashes in analysis, shift and word search on large run-length counts and some non-ASCII characters
+- Fix wildcard multi-word searches and complex FST regexes using excessive memory or CPU; very broad multi-word patterns now return an error
+- Fix the Discord bot pinging everyone, roles or users mentioned in text it echoes back
+- Fix multi-word anagrams of three or more words repeating in different word orders
+
 ## 6.0.3 - 2025-07-17
 
 _No code changes, just build process fixes._
