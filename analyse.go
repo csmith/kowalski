@@ -166,7 +166,8 @@ func analyseRunLengthEncoding(_ *SpellChecker, input string) []string {
 		num := 0
 		for i := range input {
 			if d, err := strconv.Atoi(string(input[i])); err == nil {
-				num = 10*num + d
+				// The message is truncated to 250 characters, so larger counts would only waste memory.
+				num = min(10*num+d, 250)
 			} else {
 				message.WriteString(strings.Repeat(string(input[i]), num))
 				num = 0
