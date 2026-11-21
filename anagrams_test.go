@@ -4,6 +4,9 @@ import (
 	"context"
 	"reflect"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAnagrams(t *testing.T) {
@@ -63,6 +66,14 @@ func TestMultiAnagrams(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestMultiAnagram_tooManyCandidates(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := MultiAnagram(ctx, allTwoLetterWordsChecker(t), "??????")
+	assert.ErrorIs(t, err, ErrTooManyCandidates)
 }
 
 func TestPermute(t *testing.T) {

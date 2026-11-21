@@ -3,7 +3,12 @@ package kowalski
 import (
 	"context"
 	"reflect"
+	"strings"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMatch(t *testing.T) {
@@ -56,4 +61,25 @@ func TestMultiMatch(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestMultiMatch_tooManyCandidates(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := MultiMatch(ctx, allTwoLetterWordsChecker(t), "??????")
+	assert.ErrorIs(t, err, ErrTooManyCandidates)
+}
+
+func allTwoLetterWordsChecker(t *testing.T) *SpellChecker {
+	var words strings.Builder
+	for a := 'a'; a <= 'z'; a++ {
+		for b := 'a'; b <= 'z'; b++ {
+			words.WriteString(string([]rune{a, b, '\n'}))
+		}
+	}
+
+	checker, err := CreateSpellChecker(strings.NewReader(words.String()), 26*26)
+	require.NoError(t, err)
+	return checker
 }

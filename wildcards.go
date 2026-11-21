@@ -2,6 +2,7 @@ package kowalski
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -60,6 +61,14 @@ func OffByOne(ctx context.Context, checker *SpellChecker, input string) ([]strin
 	return res, nil
 }
 
+// ErrTooManyCandidates is returned when a pattern expands to more candidates than can reasonably be searched.
+var ErrTooManyCandidates = errors.New("pattern matches too many candidates")
+
+const (
+	maxCandidates      = 1_000_000
+	ctxCheckIterations = 4096
+)
+
 // findMatch returns all valid words that match the given pattern, expanding '?' as a single character wildcard.
 // It will aggressively skip sequences that don't form valid prefixes; the maximum valid prefix length is returned as
 // the second parameter (for cases where matches are returned, this will equal len(word)).
@@ -86,6 +95,10 @@ func findMatch(ctx context.Context, checker *SpellChecker, word string, multiWor
 			}
 
 			for s := range stems {
+				if s%ctxCheckIterations == 0 && ctx.Err() != nil {
+					return nil, 0, ctx.Err()
+				}
+
 				stem := stems[s]
 				if newWord := fmt.Sprintf("%s%c", stem[len(stem)-1], nextChar); checker.Prefix(newWord) {
 					var newStem []string
@@ -97,6 +110,10 @@ func findMatch(ctx context.Context, checker *SpellChecker, word string, multiWor
 					newStems = append(newStems, newStem)
 					if multiWord && checker.Valid(newWord) && len(newWord) >= minLength {
 						newStems = append(newStems, append(append([]string{}, newStem...), ""))
+					}
+
+					if len(newStems) > maxCandidates {
+						return nil, 0, ErrTooManyCandidates
 					}
 				}
 			}

@@ -40,6 +40,9 @@ func anagram(ctx context.Context, checker *SpellChecker, word string, multiWord 
 
 		if len(matches) > 0 {
 			res = append(res, matches...)
+			if len(res) > maxCandidates {
+				return nil, ErrTooManyCandidates
+			}
 			swapBefore = len(word)
 		} else {
 			swapBefore = count
