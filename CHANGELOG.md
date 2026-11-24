@@ -9,6 +9,7 @@
 - Fix the Discord bot pinging everyone, roles or users mentioned in text it echoes back
 - Fix multi-word anagrams of three or more words repeating in different word orders
 - Fix the web server keeping slow or idle connections open indefinitely
+- Fix the Discord bot masking websocket frames with a weak random generator
 
 ## 6.0.3 - 2025-07-17
 
