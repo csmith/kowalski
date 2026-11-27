@@ -3,7 +3,7 @@ module github.com/csmith/kowalski/v6
 go 1.27.4
 
 require (
-	chameth.com/x v0.0.3
+	chameth.com/x v0.0.4
 	code.dny.dev/ssrf v0.3.0
 	github.com/bits-and-blooms/bloom/v3 v3.7.1
 	github.com/blevesearch/vellum v1.2.0
